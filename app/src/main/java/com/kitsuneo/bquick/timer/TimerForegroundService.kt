@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.core.content.ContextCompat
 import com.kitsuneo.bquick.audio.AppSoundPlayer
+import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.notification.TimerNotificationManager
 import com.kitsuneo.bquick.notification.TimerNotificationState
 import com.kitsuneo.bquick.settings.SoundSettingsRepository
@@ -356,16 +357,16 @@ class TimerForegroundService : Service() {
     private fun ActiveTimerSession.toNotificationState(): TimerNotificationState = when (this) {
         is ActiveTimerSession.Interval -> TimerNotificationState(
             modeLabel = when (currentPhase) {
-                IntervalPhase.Work -> "Work"
-                IntervalPhase.Rest -> "Rest"
-                IntervalPhase.Complete -> "Complete"
+                IntervalPhase.Work -> getString(R.string.phase_work)
+                IntervalPhase.Rest -> getString(R.string.phase_rest)
+                IntervalPhase.Complete -> getString(R.string.phase_complete)
             },
             timeText = remainingPhaseSeconds.asClock(),
             isRunning = isRunning
         )
 
         is ActiveTimerSession.Reaction -> TimerNotificationState(
-            modeLabel = "Reaction",
+            modeLabel = getString(R.string.phase_reaction),
             timeText = remainingSessionSeconds.asClock(),
             isRunning = isRunning
         )

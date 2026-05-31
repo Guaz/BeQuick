@@ -13,8 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.interval.IntervalRunningUiState
 import com.kitsuneo.bquick.timer.IntervalPhase
 import com.kitsuneo.bquick.ui.component.MetricPill
@@ -31,14 +33,14 @@ fun IntervalRunningScreen(
     modifier: Modifier = Modifier
 ) {
     val phaseLabel = when (state.currentPhase) {
-        IntervalPhase.Work -> "Work"
-        IntervalPhase.Rest -> "Rest"
-        IntervalPhase.Complete -> "Complete"
+        IntervalPhase.Work -> stringResource(R.string.phase_work)
+        IntervalPhase.Rest -> stringResource(R.string.phase_rest)
+        IntervalPhase.Complete -> stringResource(R.string.phase_complete)
     }
 
     ScreenFrame(
-        title = "Interval running",
-        subtitle = "Round ${state.currentRound} of ${state.totalRounds}",
+        title = stringResource(R.string.interval_running_title),
+        subtitle = stringResource(R.string.interval_running_subtitle, state.currentRound, state.totalRounds),
         modifier = modifier,
         onBack = onBack
     ) {
@@ -46,17 +48,17 @@ fun IntervalRunningScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            MetricPill(label = "Phase", value = phaseLabel, modifier = Modifier.weight(1f))
-            MetricPill(label = "Remaining", value = state.remainingProgramSeconds.asClock(), modifier = Modifier.weight(1f))
+            MetricPill(label = stringResource(R.string.interval_phase), value = phaseLabel, modifier = Modifier.weight(1f))
+            MetricPill(label = stringResource(R.string.remaining), value = state.remainingProgramSeconds.asClock(), modifier = Modifier.weight(1f))
         }
 
         StatusCard(
             label = phaseLabel,
             value = state.remainingPhaseSeconds.asClock(),
             supportingText = when (state.currentPhase) {
-                IntervalPhase.Work -> "Push through the active interval."
-                IntervalPhase.Rest -> "Recover before the next round."
-                IntervalPhase.Complete -> "Session complete."
+                IntervalPhase.Work -> stringResource(R.string.interval_work_support)
+                IntervalPhase.Rest -> stringResource(R.string.interval_rest_support)
+                IntervalPhase.Complete -> stringResource(R.string.interval_complete_support)
             }
         )
 
@@ -74,7 +76,7 @@ fun IntervalRunningScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Phase progress",
+                        text = stringResource(R.string.phase_progress),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -87,7 +89,7 @@ fun IntervalRunningScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Session progress",
+                        text = stringResource(R.string.session_progress),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -108,19 +110,19 @@ fun IntervalRunningScreen(
                 modifier = Modifier.weight(1f),
                 enabled = !state.isComplete
             ) {
-                Text(text = if (state.isRunning) "Pause" else "Resume")
+                Text(text = stringResource(if (state.isRunning) R.string.pause else R.string.resume))
             }
             Button(
                 onClick = onReset,
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = "Reset")
+                Text(text = stringResource(R.string.reset))
             }
         }
 
         if (state.isComplete) {
             Text(
-                text = "All rounds are done. Use Back to return or Reset to run the session again.",
+                text = stringResource(R.string.interval_complete_message),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium

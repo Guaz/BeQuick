@@ -32,11 +32,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.ui.util.asClock
 import com.kitsuneo.bquick.ui.util.toClockSecondsOrNull
 
@@ -76,7 +78,7 @@ fun ScreenFrame(
             ) {
                 if (onBack != null) {
                     Button(onClick = onBack) {
-                        Text(text = "Back")
+                        Text(text = stringResource(R.string.back))
                     }
                 } else {
                     Spacer(modifier = Modifier.height(1.dp))

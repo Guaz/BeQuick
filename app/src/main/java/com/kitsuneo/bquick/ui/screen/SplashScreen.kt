@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.splash.SplashUiState
 
 @Composable
@@ -41,18 +43,20 @@ fun SplashScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "BQuick",
+                text = stringResource(R.string.splash_title),
                 style = MaterialTheme.typography.displayLarge,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.onPrimary
             )
             Text(
-                text = "Interval work and random cue drills",
+                text = stringResource(R.string.splash_subtitle),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
             )
             Text(
-                text = if (state.isReadyToContinue) "Loading complete" else "Preparing session tools",
+                text = stringResource(
+                    if (state.isReadyToContinue) R.string.splash_loading_complete else R.string.splash_preparing
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.72f)
             )

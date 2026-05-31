@@ -2,6 +2,10 @@ package com.kitsuneo.bquick.settings
 
 import android.content.Context
 import android.media.ToneGenerator
+import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import com.kitsuneo.bquick.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,17 +15,22 @@ enum class SoundTarget {
     Reaction
 }
 
-enum class BuiltInSound(val id: String, val label: String, val toneType: Int) {
-    Pulse("pulse", "Pulse", ToneGenerator.TONE_PROP_BEEP),
-    Bell("bell", "Bell", ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD),
-    Chime("chime", "Chime", ToneGenerator.TONE_CDMA_PIP)
+enum class BuiltInSound(
+    val id: String,
+    val defaultLabel: String,
+    @StringRes val labelRes: Int,
+    val toneType: Int
+) {
+    Pulse("pulse", "Pulse", R.string.sound_pulse, ToneGenerator.TONE_PROP_BEEP),
+    Bell("bell", "Bell", R.string.sound_bell, ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD),
+    Chime("chime", "Chime", R.string.sound_chime, ToneGenerator.TONE_CDMA_PIP)
 }
 
 sealed interface SoundSelection {
     val label: String
 
     data class BuiltIn(val sound: BuiltInSound) : SoundSelection {
-        override val label: String = sound.label
+        override val label: String = sound.defaultLabel
     }
 
     data class Custom(val uri: String, override val label: String) : SoundSelection
@@ -29,7 +38,9 @@ sealed interface SoundSelection {
 
 data class SoundSettings(
     val modeSwitch: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.Pulse),
-    val reaction: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.Bell)
+    val reaction: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.Bell),
+    val alarmTimeFormat: AlarmTimeFormat = AlarmTimeFormat.Hours24,
+    val appLanguage: AppLanguage = AppLanguage.English
 )
 
 object SoundSettingsRepository {
@@ -38,6 +49,8 @@ object SoundSettingsRepository {
     private const val ModeSwitchLabelKey = "mode_switch_label"
     private const val ReactionKey = "reaction"
     private const val ReactionLabelKey = "reaction_label"
+    private const val AlarmTimeFormatKey = "alarm_time_format"
+    private const val AppLanguageKey = "app_language"
     private lateinit var appContext: Context
     private val _settings = MutableStateFlow(SoundSettings())
     val settings: StateFlow<SoundSettings> = _settings.asStateFlow()
@@ -45,6 +58,11 @@ object SoundSettingsRepository {
     fun initialize(context: Context) {
         appContext = context.applicationContext
         _settings.value = load()
+        applyAppLanguage(_settings.value.appLanguage)
+    }
+
+    fun applyStoredAppLanguage(context: Context) {
+        applyAppLanguage(resolveLanguage(context))
     }
 
     fun updateBuiltIn(target: SoundTarget, sound: BuiltInSound) {
@@ -65,6 +83,16 @@ object SoundSettingsRepository {
         persist(updated)
     }
 
+    fun updateAlarmTimeFormat(format: AlarmTimeFormat) {
+        persist(_settings.value.copy(alarmTimeFormat = format))
+    }
+
+    fun updateAppLanguage(language: AppLanguage) {
+        val updated = _settings.value.copy(appLanguage = language)
+        persist(updated)
+        applyAppLanguage(language)
+    }
+
     private fun load(): SoundSettings {
         if (!::appContext.isInitialized) return SoundSettings()
         val prefs = appContext.getSharedPreferences(PrefName, Context.MODE_PRIVATE)
@@ -78,7 +106,11 @@ object SoundSettingsRepository {
                 prefs.getString(ReactionKey, null),
                 prefs.getString(ReactionLabelKey, null),
                 fallback = SoundSelection.BuiltIn(BuiltInSound.Bell)
-            )
+            ),
+            alarmTimeFormat = AlarmTimeFormat.entries.firstOrNull {
+                it.name == prefs.getString(AlarmTimeFormatKey, AlarmTimeFormat.Hours24.name)
+            } ?: AlarmTimeFormat.Hours24,
+            appLanguage = resolveLanguage(appContext)
         )
     }
 
@@ -91,6 +123,8 @@ object SoundSettingsRepository {
             .putString(ModeSwitchLabelKey, settings.modeSwitch.label)
             .putString(ReactionKey, encode(settings.reaction))
             .putString(ReactionLabelKey, settings.reaction.label)
+            .putString(AlarmTimeFormatKey, settings.alarmTimeFormat.name)
+            .putString(AppLanguageKey, settings.appLanguage.languageTag)
             .apply()
     }
 
@@ -110,10 +144,25 @@ object SoundSettingsRepository {
 
             encoded.startsWith("custom:") -> {
                 val uri = encoded.substringAfter(':')
-                SoundSelection.Custom(uri = uri, label = label ?: "Selected media")
+                SoundSelection.Custom(uri = uri, label = label ?: appContext.getString(R.string.selected_media))
             }
 
             else -> fallback
         }
     }
+
+    private fun resolveLanguage(context: Context): AppLanguage {
+        val prefs = context.applicationContext.getSharedPreferences(PrefName, Context.MODE_PRIVATE)
+        return AppLanguage.fromLanguageTag(prefs.getString(AppLanguageKey, null))
+            ?: AppLanguage.fromDeviceLocale()
+    }
+
+    private fun applyAppLanguage(language: AppLanguage) {
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(language.languageTag))
+    }
+}
+
+fun SoundSelection.displayLabel(context: Context): String = when (this) {
+    is SoundSelection.BuiltIn -> context.getString(sound.labelRes)
+    is SoundSelection.Custom -> label
 }

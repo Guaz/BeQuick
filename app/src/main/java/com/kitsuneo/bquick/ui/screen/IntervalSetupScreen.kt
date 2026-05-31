@@ -10,8 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.interval.IntervalSetupUiState
 import com.kitsuneo.bquick.ui.component.MetricPill
 import com.kitsuneo.bquick.ui.component.NumberAdjusterCard
@@ -32,8 +34,8 @@ fun IntervalSetupScreen(
     val startEnabled = state.workSeconds > 0 || state.restSeconds > 0
 
     ScreenFrame(
-        title = "Interval setup",
-        subtitle = "Replicates the BFast interval flow, now as a real Compose + MVVM timer.",
+        title = stringResource(R.string.interval_setup_title),
+        subtitle = stringResource(R.string.interval_setup_subtitle),
         modifier = modifier,
         onBack = onBack
     ) {
@@ -41,32 +43,32 @@ fun IntervalSetupScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            MetricPill(label = "Total time", value = state.totalDurationSeconds.asClock(), modifier = Modifier.weight(1f))
-            MetricPill(label = "Rounds", value = state.rounds.toString(), modifier = Modifier.weight(1f))
+            MetricPill(label = stringResource(R.string.interval_total_time), value = state.totalDurationSeconds.asClock(), modifier = Modifier.weight(1f))
+            MetricPill(label = stringResource(R.string.interval_rounds), value = state.rounds.toString(), modifier = Modifier.weight(1f))
         }
 
         TimeAdjusterCard(
-            label = "Work window",
+            label = stringResource(R.string.interval_work_window),
             seconds = state.workSeconds,
-            helper = "The active part of each round.",
+            helper = stringResource(R.string.interval_work_helper),
             onSecondsChange = onWorkSecondsChange,
             minSeconds = 0,
             maxSeconds = 180
         )
 
         TimeAdjusterCard(
-            label = "Rest window",
+            label = stringResource(R.string.interval_rest_window),
             seconds = state.restSeconds,
-            helper = "Recovery time between work rounds.",
+            helper = stringResource(R.string.interval_rest_helper),
             onSecondsChange = onRestSecondsChange,
             minSeconds = 0,
             maxSeconds = 120
         )
 
         NumberAdjusterCard(
-            label = "Rounds",
+            label = stringResource(R.string.interval_rounds),
             value = state.rounds,
-            helper = "How many work blocks the session should run.",
+            helper = stringResource(R.string.interval_rounds_helper),
             onValueChange = onRoundsChange,
             minValue = 1,
             maxValue = 20
@@ -85,7 +87,7 @@ fun IntervalSetupScreen(
                     enabled = startEnabled
                 ) {
                     Text(
-                        text = "Start interval session",
+                        text = stringResource(R.string.interval_start),
                         fontWeight = FontWeight.Bold
                     )
                 }

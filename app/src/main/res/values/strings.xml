@@ -1,4 +1,168 @@
 <resources>
     <string name="app_name">BQuick</string>
+    <string name="back">Back</string>
+
+    <string name="splash_title">BQuick</string>
+    <string name="splash_subtitle">Interval work and random cue drills</string>
+    <string name="splash_loading_complete">Loading complete</string>
+    <string name="splash_preparing">Preparing session tools</string>
+
     <string name="home_title">Fast focus tools</string>
+    <string name="home_subtitle">A Compose rewrite of the BFast concept with two training modes.</string>
+    <string name="home_interval_eyebrow">Structured timer</string>
+    <string name="home_interval_title">Interval</string>
+    <string name="home_interval_description">Build work and rest rounds, then run the session with a live countdown.</string>
+    <string name="home_interval_action">Open interval</string>
+    <string name="home_random_eyebrow">Cue drill</string>
+    <string name="home_random_title">Random Sound Generator</string>
+    <string name="home_random_description">Trigger short random beeps inside a timed session for reaction practice.</string>
+    <string name="home_random_action">Open random sound</string>
+    <string name="home_alarms_eyebrow">Daily schedule</string>
+    <string name="home_alarms_title">Alarms</string>
+    <string name="home_alarms_description">Create multiple daily alarms and toggle them on or off.</string>
+    <string name="home_alarms_action">Open alarms</string>
+    <string name="home_no_alarms">No alarms</string>
+    <plurals name="home_enabled_alarms">
+        <item quantity="one">%d enabled</item>
+        <item quantity="other">%d enabled</item>
+    </plurals>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_subtitle">Choose language, alarm time format and sounds for timer events.</string>
+    <string name="settings_card_title">Settings</string>
+    <string name="settings_mode_switch_sound">Mode switch sound: %1$s</string>
+    <string name="settings_reaction_sound">Reaction cue sound: %1$s</string>
+    <string name="settings_alarm_time_format">Alarm time format: %1$s</string>
+    <string name="settings_language">Language: %1$s</string>
+    <string name="settings_open">Open settings</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_alarm_time_format_title">Alarm time format</string>
+    <string name="settings_mode_switch_sound_title">Mode switch sound</string>
+    <string name="settings_reaction_sound_title">Reaction cue sound</string>
+    <string name="current_value">Current: %1$s</string>
+    <string name="choose_media">Choose media</string>
+    <string name="selected_media">Selected media</string>
+    <string name="language_english">English</string>
+    <string name="language_polish">Polski</string>
+    <string name="alarm_time_format_24h">24H</string>
+    <string name="alarm_time_format_12h">12H</string>
+    <string name="sound_pulse">Pulse</string>
+    <string name="sound_bell">Bell</string>
+    <string name="sound_chime">Chime</string>
+
+    <string name="interval_setup_title">Interval setup</string>
+    <string name="interval_setup_subtitle">Replicates the BFast interval flow, now as a real Compose + MVVM timer.</string>
+    <string name="interval_total_time">Total time</string>
+    <string name="interval_rounds">Rounds</string>
+    <string name="interval_work_window">Work window</string>
+    <string name="interval_work_helper">The active part of each round.</string>
+    <string name="interval_rest_window">Rest window</string>
+    <string name="interval_rest_helper">Recovery time between work rounds.</string>
+    <string name="interval_rounds_helper">How many work blocks the session should run.</string>
+    <string name="interval_start">Start interval session</string>
+
+    <string name="random_setup_title">Random sound setup</string>
+    <string name="random_setup_subtitle">Replicates the BFast random cue generator with configurable cue spacing.</string>
+    <string name="random_session">Session</string>
+    <string name="random_cue_range">Cue range</string>
+    <string name="random_duration">Duration</string>
+    <string name="random_duration_helper">How long the drill should keep generating random cues.</string>
+    <string name="random_min_gap">Minimum cue gap</string>
+    <string name="random_min_gap_helper">Shortest time between consecutive sound cues.</string>
+    <string name="random_max_gap">Maximum cue gap</string>
+    <string name="random_max_gap_helper">Longest wait before the next cue is allowed.</string>
+    <string name="random_start">Start random cue session</string>
+
+    <string name="phase_work">Work</string>
+    <string name="phase_rest">Rest</string>
+    <string name="phase_complete">Complete</string>
+    <string name="phase_reaction">Reaction</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="reset">Reset</string>
+    <string name="done">Done</string>
+
+    <string name="interval_running_title">Interval running</string>
+    <string name="interval_running_subtitle">Round %1$d of %2$d</string>
+    <string name="interval_phase">Phase</string>
+    <string name="remaining">Remaining</string>
+    <string name="interval_work_support">Push through the active interval.</string>
+    <string name="interval_rest_support">Recover before the next round.</string>
+    <string name="interval_complete_support">Session complete.</string>
+    <string name="phase_progress">Phase progress</string>
+    <string name="session_progress">Session progress</string>
+    <string name="interval_complete_message">All rounds are done. Use Back to return or Reset to run the session again.</string>
+
+    <string name="random_running_title">Random sound running</string>
+    <string name="random_running_subtitle">Cue %1$d will fire in a random window.</string>
+    <string name="cues_fired">Cues fired</string>
+    <string name="random_next_cue">Next cue</string>
+    <string name="random_complete_support">The drill ended. Reset to run it again.</string>
+    <string name="random_running_support">Stay alert for the next sound trigger.</string>
+
+    <string name="alarms_title">Alarms</string>
+    <string name="alarms_summary">%1$d enabled out of %2$d alarms.</string>
+    <string name="alarms_empty">No alarms yet. Use the button below to create your first alarm.</string>
+    <string name="create_new_alarm">Create new alarm</string>
+    <string name="new_alarm">New alarm</string>
+    <string name="edit_alarm">Edit alarm</string>
+    <string name="alarm_editor_subtitle">Set time, repeat days, sound, volume and alarm behavior.</string>
+    <string name="save_alarm">Save alarm</string>
+    <string name="update_alarm">Update alarm</string>
+    <string name="remove_alarm">Remove alarm</string>
+    <string name="time">Time</string>
+    <string name="hour">Hour</string>
+    <string name="minute">Minute</string>
+    <string name="repeat">Repeat</string>
+    <string name="repeat_description">Choose the days when this alarm should repeat. Leave all unselected for a one-time alarm.</string>
+    <string name="alarm_sound">Alarm sound</string>
+    <string name="alarm_volume">Alarm volume</string>
+    <string name="fade_up_effect">Fade up effect</string>
+    <string name="fade_up_description">Start at 10%% volume and increase to full volume over 30 seconds.</string>
+    <string name="vibrate">Vibrate</string>
+    <string name="vibrate_description">Vibrate alongside the alarm sound.</string>
+    <string name="allow_snooze">Allow snooze</string>
+    <string name="allow_snooze_description">When snoozed, ring again after 5 minutes.</string>
+    <string name="alarm_name">Alarm name</string>
+    <string name="alarm_name_placeholder">Morning run</string>
+    <string name="alarm_default_name">Alarm</string>
+    <string name="alarm_repeat_once">Once</string>
+    <string name="alarm_in_value">Alarm in %1$s</string>
+    <string name="alarm_will_trigger_in_value">Alarm will trigger in %1$s</string>
+
+    <string name="weekday_short_monday">Mon</string>
+    <string name="weekday_short_tuesday">Tue</string>
+    <string name="weekday_short_wednesday">Wed</string>
+    <string name="weekday_short_thursday">Thu</string>
+    <string name="weekday_short_friday">Fri</string>
+    <string name="weekday_short_saturday">Sat</string>
+    <string name="weekday_short_sunday">Sun</string>
+    <string name="weekday_full_monday">Monday</string>
+    <string name="weekday_full_tuesday">Tuesday</string>
+    <string name="weekday_full_wednesday">Wednesday</string>
+    <string name="weekday_full_thursday">Thursday</string>
+    <string name="weekday_full_friday">Friday</string>
+    <string name="weekday_full_saturday">Saturday</string>
+    <string name="weekday_full_sunday">Sunday</string>
+
+    <plurals name="duration_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+
+    <string name="timer_notification_channel_name">Timer session</string>
+    <string name="timer_notification_channel_description">Shows the currently running timer session.</string>
+    <string name="alarm_channel_name">Alarm ringing</string>
+    <string name="alarm_channel_description">Active ringing alarms</string>
+    <string name="alarm_for_time">Alarm for %1$s</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="snooze">Snooze</string>
 </resources>

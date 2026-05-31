@@ -10,8 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.randomsound.RandomSoundSetupUiState
 import com.kitsuneo.bquick.ui.component.AdjusterCard
 import com.kitsuneo.bquick.ui.component.MetricPill
@@ -30,8 +32,8 @@ fun RandomSoundSetupScreen(
     modifier: Modifier = Modifier
 ) {
     ScreenFrame(
-        title = "Random sound setup",
-        subtitle = "Replicates the BFast random cue generator with configurable cue spacing.",
+        title = stringResource(R.string.random_setup_title),
+        subtitle = stringResource(R.string.random_setup_subtitle),
         modifier = modifier,
         onBack = onBack
     ) {
@@ -39,36 +41,36 @@ fun RandomSoundSetupScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            MetricPill(label = "Session", value = state.totalSessionSeconds.asClock(), modifier = Modifier.weight(1f))
+            MetricPill(label = stringResource(R.string.random_session), value = state.totalSessionSeconds.asClock(), modifier = Modifier.weight(1f))
             MetricPill(
-                label = "Cue range",
+                label = stringResource(R.string.random_cue_range),
                 value = "${state.minGapSeconds.asClock()}-${state.maxGapSeconds.asClock()}",
                 modifier = Modifier.weight(1f)
             )
         }
 
         TimeAdjusterCard(
-            label = "Duration",
+            label = stringResource(R.string.random_duration),
             seconds = state.durationSeconds,
-            helper = "How long the drill should keep generating random cues.",
+            helper = stringResource(R.string.random_duration_helper),
             onSecondsChange = onDurationSecondsChange,
             minSeconds = 10,
             maxSeconds = 59 * 60 + 59
         )
 
         TimeAdjusterCard(
-            label = "Minimum cue gap",
+            label = stringResource(R.string.random_min_gap),
             seconds = state.minGapSeconds,
-            helper = "Shortest time between consecutive sound cues.",
+            helper = stringResource(R.string.random_min_gap_helper),
             onSecondsChange = onMinGapSecondsChange,
             minSeconds = 1,
             maxSeconds = 59 * 60 + 59
         )
 
         TimeAdjusterCard(
-            label = "Maximum cue gap",
+            label = stringResource(R.string.random_max_gap),
             seconds = state.maxGapSeconds,
-            helper = "Longest wait before the next cue is allowed.",
+            helper = stringResource(R.string.random_max_gap_helper),
             onSecondsChange = onMaxGapSecondsChange,
             minSeconds = state.minGapSeconds,
             maxSeconds = 59 * 60 + 59
@@ -84,7 +86,7 @@ fun RandomSoundSetupScreen(
             ) {
                 Button(onClick = onStart) {
                     Text(
-                        text = "Start random cue session",
+                        text = stringResource(R.string.random_start),
                         fontWeight = FontWeight.Bold
                     )
                 }

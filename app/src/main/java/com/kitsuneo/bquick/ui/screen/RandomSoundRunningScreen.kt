@@ -13,7 +13,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.randomsound.RandomSoundRunningUiState
 import com.kitsuneo.bquick.ui.component.MetricPill
 import com.kitsuneo.bquick.ui.component.ScreenFrame
@@ -29,8 +31,8 @@ fun RandomSoundRunningScreen(
     modifier: Modifier = Modifier
 ) {
     ScreenFrame(
-        title = "Random sound running",
-        subtitle = "Cue ${state.cueCount + 1} will fire in a random window.",
+        title = stringResource(R.string.random_running_title),
+        subtitle = stringResource(R.string.random_running_subtitle, state.cueCount + 1),
         modifier = modifier,
         onBack = onBack
     ) {
@@ -38,17 +40,17 @@ fun RandomSoundRunningScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            MetricPill(label = "Remaining", value = state.remainingSessionSeconds.asClock(), modifier = Modifier.weight(1f))
-            MetricPill(label = "Cues fired", value = state.cueCount.toString(), modifier = Modifier.weight(1f))
+            MetricPill(label = stringResource(R.string.remaining), value = state.remainingSessionSeconds.asClock(), modifier = Modifier.weight(1f))
+            MetricPill(label = stringResource(R.string.cues_fired), value = state.cueCount.toString(), modifier = Modifier.weight(1f))
         }
 
         StatusCard(
-            label = if (state.isComplete) "Complete" else "Next cue",
-            value = if (state.isComplete) "Done" else "${state.nextCueInSeconds}s",
+            label = stringResource(if (state.isComplete) R.string.phase_complete else R.string.random_next_cue),
+            value = if (state.isComplete) stringResource(R.string.done) else "${state.nextCueInSeconds}s",
             supportingText = if (state.isComplete) {
-                "The drill ended. Reset to run it again."
+                stringResource(R.string.random_complete_support)
             } else {
-                "Stay alert for the next sound trigger."
+                stringResource(R.string.random_running_support)
             }
         )
 
@@ -63,7 +65,7 @@ fun RandomSoundRunningScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Session progress",
+                    text = stringResource(R.string.session_progress),
                     style = MaterialTheme.typography.titleMedium
                 )
                 LinearProgressIndicator(
@@ -82,13 +84,13 @@ fun RandomSoundRunningScreen(
                 modifier = Modifier.weight(1f),
                 enabled = !state.isComplete
             ) {
-                Text(text = if (state.isRunning) "Pause" else "Resume")
+                Text(text = stringResource(if (state.isRunning) R.string.pause else R.string.resume))
             }
             Button(
                 onClick = onReset,
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = "Reset")
+                Text(text = stringResource(R.string.reset))
             }
         }
     }

@@ -41,7 +41,7 @@ object TimerNotificationManager {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val actionLabel = if (state.isRunning) "Pause" else "Resume"
+        val actionLabel = context.getString(if (state.isRunning) R.string.pause else R.string.resume)
         val actionIcon = if (state.isRunning) android.R.drawable.ic_media_pause
         else android.R.drawable.ic_media_play
 
@@ -73,10 +73,10 @@ object TimerNotificationManager {
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channel = NotificationChannel(
             ChannelId,
-            "Timer session",
+            context.getString(R.string.timer_notification_channel_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "Shows the currently running timer session."
+            description = context.getString(R.string.timer_notification_channel_description)
         }
         notificationManager.createNotificationChannel(channel)
     }

@@ -1,0 +1,176 @@
+<resources>
+    <string name="app_name">BQuick</string>
+    <string name="back">Wstecz</string>
+
+    <string name="splash_title">BQuick</string>
+    <string name="splash_subtitle">Interwały pracy i losowe sygnały dźwiękowe</string>
+    <string name="splash_loading_complete">Ładowanie zakończone</string>
+    <string name="splash_preparing">Przygotowywanie narzędzi sesji</string>
+
+    <string name="home_title">Narzędzia koncentracji</string>
+    <string name="home_subtitle">Compose’owa wersja koncepcji BFast z dwoma trybami treningu.</string>
+    <string name="home_interval_eyebrow">Timer strukturalny</string>
+    <string name="home_interval_title">Interwały</string>
+    <string name="home_interval_description">Ustaw rundy pracy i odpoczynku, a potem uruchom sesję z odliczaniem na żywo.</string>
+    <string name="home_interval_action">Otwórz interwały</string>
+    <string name="home_random_eyebrow">Trening reakcji</string>
+    <string name="home_random_title">Losowe dźwięki</string>
+    <string name="home_random_description">Uruchamiaj krótkie losowe sygnały podczas ograniczonej czasowo sesji treningowej.</string>
+    <string name="home_random_action">Otwórz losowe dźwięki</string>
+    <string name="home_alarms_eyebrow">Plan dnia</string>
+    <string name="home_alarms_title">Alarmy</string>
+    <string name="home_alarms_description">Twórz wiele codziennych alarmów i włączaj lub wyłączaj je.</string>
+    <string name="home_alarms_action">Otwórz alarmy</string>
+    <string name="home_no_alarms">Brak alarmów</string>
+    <plurals name="home_enabled_alarms">
+        <item quantity="one">%d włączony</item>
+        <item quantity="few">%d włączone</item>
+        <item quantity="many">%d włączonych</item>
+        <item quantity="other">%d włączonych</item>
+    </plurals>
+
+    <string name="settings_title">Ustawienia</string>
+    <string name="settings_subtitle">Wybierz język, format czasu alarmu i dźwięki dla zdarzeń timera.</string>
+    <string name="settings_card_title">Ustawienia</string>
+    <string name="settings_mode_switch_sound">Dźwięk zmiany trybu: %1$s</string>
+    <string name="settings_reaction_sound">Dźwięk sygnału reakcji: %1$s</string>
+    <string name="settings_alarm_time_format">Format czasu alarmu: %1$s</string>
+    <string name="settings_language">Język: %1$s</string>
+    <string name="settings_open">Otwórz ustawienia</string>
+    <string name="settings_language_title">Język</string>
+    <string name="settings_alarm_time_format_title">Format czasu alarmu</string>
+    <string name="settings_mode_switch_sound_title">Dźwięk zmiany trybu</string>
+    <string name="settings_reaction_sound_title">Dźwięk sygnału reakcji</string>
+    <string name="current_value">Aktualnie: %1$s</string>
+    <string name="choose_media">Wybierz z pamięci</string>
+    <string name="selected_media">Wybrany plik</string>
+    <string name="language_english">English</string>
+    <string name="language_polish">Polski</string>
+    <string name="alarm_time_format_24h">24H</string>
+    <string name="alarm_time_format_12h">12H</string>
+    <string name="sound_pulse">Impuls</string>
+    <string name="sound_bell">Dzwonek</string>
+    <string name="sound_chime">Kurant</string>
+
+    <string name="interval_setup_title">Ustawienia interwałów</string>
+    <string name="interval_setup_subtitle">Odwzorowanie trybu interwałowego BFast, teraz jako prawdziwy timer w Compose + MVVM.</string>
+    <string name="interval_total_time">Całkowity czas</string>
+    <string name="interval_rounds">Rundy</string>
+    <string name="interval_work_window">Czas pracy</string>
+    <string name="interval_work_helper">Aktywna część każdej rundy.</string>
+    <string name="interval_rest_window">Czas odpoczynku</string>
+    <string name="interval_rest_helper">Czas regeneracji pomiędzy rundami pracy.</string>
+    <string name="interval_rounds_helper">Ile bloków pracy ma wykonać sesja.</string>
+    <string name="interval_start">Rozpocznij sesję interwałową</string>
+
+    <string name="random_setup_title">Ustawienia losowych dźwięków</string>
+    <string name="random_setup_subtitle">Odwzorowanie generatora losowych sygnałów z BFast z konfigurowalnymi odstępami.</string>
+    <string name="random_session">Sesja</string>
+    <string name="random_cue_range">Zakres sygnału</string>
+    <string name="random_duration">Czas trwania</string>
+    <string name="random_duration_helper">Jak długo trening ma generować losowe sygnały.</string>
+    <string name="random_min_gap">Minimalny odstęp</string>
+    <string name="random_min_gap_helper">Najkrótszy czas pomiędzy kolejnymi sygnałami.</string>
+    <string name="random_max_gap">Maksymalny odstęp</string>
+    <string name="random_max_gap_helper">Najdłuższy dozwolony czas oczekiwania na kolejny sygnał.</string>
+    <string name="random_start">Rozpocznij sesję losowych sygnałów</string>
+
+    <string name="phase_work">Praca</string>
+    <string name="phase_rest">Odpoczynek</string>
+    <string name="phase_complete">Koniec</string>
+    <string name="phase_reaction">Reakcja</string>
+    <string name="pause">Pauza</string>
+    <string name="resume">Wznów</string>
+    <string name="reset">Resetuj</string>
+    <string name="done">Gotowe</string>
+
+    <string name="interval_running_title">Trwa sesja interwałowa</string>
+    <string name="interval_running_subtitle">Runda %1$d z %2$d</string>
+    <string name="interval_phase">Faza</string>
+    <string name="remaining">Pozostało</string>
+    <string name="interval_work_support">Dociśnij aktywny interwał.</string>
+    <string name="interval_rest_support">Odpocznij przed kolejną rundą.</string>
+    <string name="interval_complete_support">Sesja zakończona.</string>
+    <string name="phase_progress">Postęp fazy</string>
+    <string name="session_progress">Postęp sesji</string>
+    <string name="interval_complete_message">Wszystkie rundy są zakończone. Użyj Wstecz, aby wrócić, albo Resetuj, aby uruchomić sesję ponownie.</string>
+
+    <string name="random_running_title">Trwa sesja losowych dźwięków</string>
+    <string name="random_running_subtitle">Sygnał %1$d pojawi się w losowym oknie czasowym.</string>
+    <string name="cues_fired">Wyemitowane sygnały</string>
+    <string name="random_next_cue">Następny sygnał</string>
+    <string name="random_complete_support">Trening zakończył się. Zresetuj, aby uruchomić go ponownie.</string>
+    <string name="random_running_support">Zachowaj czujność na kolejny sygnał.</string>
+
+    <string name="alarms_title">Alarmy</string>
+    <string name="alarms_summary">%1$d włączonych z %2$d alarmów.</string>
+    <string name="alarms_empty">Nie ma jeszcze alarmów. Użyj przycisku poniżej, aby utworzyć pierwszy alarm.</string>
+    <string name="create_new_alarm">Utwórz nowy alarm</string>
+    <string name="new_alarm">Nowy alarm</string>
+    <string name="edit_alarm">Edytuj alarm</string>
+    <string name="alarm_editor_subtitle">Ustaw czas, dni powtarzania, dźwięk, głośność i zachowanie alarmu.</string>
+    <string name="save_alarm">Zapisz alarm</string>
+    <string name="update_alarm">Zaktualizuj alarm</string>
+    <string name="remove_alarm">Usuń alarm</string>
+    <string name="time">Czas</string>
+    <string name="hour">Godzina</string>
+    <string name="minute">Minuta</string>
+    <string name="repeat">Powtarzanie</string>
+    <string name="repeat_description">Wybierz dni, w które alarm ma się powtarzać. Pozostaw wszystko odznaczone dla alarmu jednorazowego.</string>
+    <string name="alarm_sound">Dźwięk alarmu</string>
+    <string name="alarm_volume">Głośność alarmu</string>
+    <string name="fade_up_effect">Łagodne narastanie</string>
+    <string name="fade_up_description">Start od 10%% głośności i wzrost do pełnej wartości przez 30 sekund.</string>
+    <string name="vibrate">Wibracje</string>
+    <string name="vibrate_description">Wibruj równolegle z dźwiękiem alarmu.</string>
+    <string name="allow_snooze">Pozwól na drzemkę</string>
+    <string name="allow_snooze_description">Po drzemce alarm zadzwoni ponownie po 5 minutach.</string>
+    <string name="alarm_name">Nazwa alarmu</string>
+    <string name="alarm_name_placeholder">Poranny bieg</string>
+    <string name="alarm_default_name">Alarm</string>
+    <string name="alarm_repeat_once">Jednorazowo</string>
+    <string name="alarm_in_value">Alarm za %1$s</string>
+    <string name="alarm_will_trigger_in_value">Alarm uruchomi się za %1$s</string>
+
+    <string name="weekday_short_monday">Pon</string>
+    <string name="weekday_short_tuesday">Wt</string>
+    <string name="weekday_short_wednesday">Śr</string>
+    <string name="weekday_short_thursday">Czw</string>
+    <string name="weekday_short_friday">Pt</string>
+    <string name="weekday_short_saturday">Sob</string>
+    <string name="weekday_short_sunday">Ndz</string>
+    <string name="weekday_full_monday">Poniedziałek</string>
+    <string name="weekday_full_tuesday">Wtorek</string>
+    <string name="weekday_full_wednesday">Środa</string>
+    <string name="weekday_full_thursday">Czwartek</string>
+    <string name="weekday_full_friday">Piątek</string>
+    <string name="weekday_full_saturday">Sobota</string>
+    <string name="weekday_full_sunday">Niedziela</string>
+
+    <plurals name="duration_days">
+        <item quantity="one">%d dzień</item>
+        <item quantity="few">%d dni</item>
+        <item quantity="many">%d dni</item>
+        <item quantity="other">%d dnia</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%d godzina</item>
+        <item quantity="few">%d godziny</item>
+        <item quantity="many">%d godzin</item>
+        <item quantity="other">%d godziny</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%d minuta</item>
+        <item quantity="few">%d minuty</item>
+        <item quantity="many">%d minut</item>
+        <item quantity="other">%d minuty</item>
+    </plurals>
+
+    <string name="timer_notification_channel_name">Sesja timera</string>
+    <string name="timer_notification_channel_description">Pokazuje aktualnie uruchomioną sesję timera.</string>
+    <string name="alarm_channel_name">Dzwoniący alarm</string>
+    <string name="alarm_channel_description">Aktywnie dzwoniące alarmy</string>
+    <string name="alarm_for_time">Alarm na %1$s</string>
+    <string name="dismiss">Odrzuć</string>
+    <string name="snooze">Drzemka</string>
+</resources>
