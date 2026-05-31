@@ -5,12 +5,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.kitsuneo.bquick.feature.home.HomeViewModel
 import com.kitsuneo.bquick.feature.interval.IntervalRunningViewModel
 import com.kitsuneo.bquick.feature.interval.IntervalSetupViewModel
@@ -18,16 +17,23 @@ import com.kitsuneo.bquick.feature.randomsound.RandomSoundRunningViewModel
 import com.kitsuneo.bquick.feature.randomsound.RandomSoundSetupViewModel
 import com.kitsuneo.bquick.feature.splash.SplashViewModel
 import com.kitsuneo.bquick.navigation.AppRoute
+import com.kitsuneo.bquick.notification.NotificationPermissionEffect
+import com.kitsuneo.bquick.settings.BuiltInSound
+import com.kitsuneo.bquick.settings.SoundTarget
+import com.kitsuneo.bquick.timer.TimerForegroundService
 import com.kitsuneo.bquick.ui.screen.HomeScreen
 import com.kitsuneo.bquick.ui.screen.IntervalRunningScreen
 import com.kitsuneo.bquick.ui.screen.IntervalSetupScreen
 import com.kitsuneo.bquick.ui.screen.RandomSoundRunningScreen
 import com.kitsuneo.bquick.ui.screen.RandomSoundSetupScreen
+import com.kitsuneo.bquick.ui.screen.SettingsScreen
 import com.kitsuneo.bquick.ui.screen.SplashScreen
 
 @Composable
 fun BQuickApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
+    val context = LocalContext.current
+    NotificationPermissionEffect()
 
     NavHost(
         navController = navController,
@@ -58,7 +64,20 @@ fun BQuickApp(modifier: Modifier = Modifier) {
             HomeScreen(
                 state = state,
                 onOpenInterval = { navController.navigate(AppRoute.IntervalSetup.route) },
-                onOpenRandomSound = { navController.navigate(AppRoute.RandomSoundSetup.route) }
+                onOpenRandomSound = { navController.navigate(AppRoute.RandomSoundSetup.route) },
+                onOpenSettings = { navController.navigate(AppRoute.Settings.route) }
+            )
+        }
+
+        composable(AppRoute.Settings.route) {
+            val viewModel: HomeViewModel = viewModel()
+            val state by viewModel.state.collectAsState()
+
+            SettingsScreen(
+                state = state,
+                onBack = { navController.popBackStack() },
+                onSelectBuiltInSound = viewModel::selectBuiltInSound,
+                onSelectCustomSound = viewModel::selectCustomSound
             )
         }
 
@@ -73,46 +92,26 @@ fun BQuickApp(modifier: Modifier = Modifier) {
                 onRestSecondsChange = viewModel::updateRestSeconds,
                 onRoundsChange = viewModel::updateRounds,
                 onStart = {
-                    navController.navigate(
-                        AppRoute.IntervalRunning.createRoute(
-                            workSeconds = state.workSeconds,
-                            restSeconds = state.restSeconds,
-                            rounds = state.rounds
-                        )
+                    TimerForegroundService.startInterval(
+                        context = context,
+                        workSeconds = state.workSeconds,
+                        restSeconds = state.restSeconds,
+                        rounds = state.rounds
                     )
+                    navController.navigate(AppRoute.IntervalRunning.route)
                 }
             )
         }
 
-        composable(
-            route = AppRoute.IntervalRunning.route,
-            arguments = listOf(
-                navArgument(AppRoute.IntervalRunning.WorkSecondsArg) { type = NavType.IntType },
-                navArgument(AppRoute.IntervalRunning.RestSecondsArg) { type = NavType.IntType },
-                navArgument(AppRoute.IntervalRunning.RoundsArg) { type = NavType.IntType }
-            )
-        ) { backStackEntry ->
-            val workSeconds =
-                backStackEntry.arguments?.getInt(AppRoute.IntervalRunning.WorkSecondsArg) ?: 30
-            val restSeconds =
-                backStackEntry.arguments?.getInt(AppRoute.IntervalRunning.RestSecondsArg) ?: 15
-            val rounds =
-                backStackEntry.arguments?.getInt(AppRoute.IntervalRunning.RoundsArg) ?: 6
-            val viewModel: IntervalRunningViewModel = viewModel(
-                key = "interval-$workSeconds-$restSeconds-$rounds",
-                factory = IntervalRunningViewModel.factory(
-                    workSeconds = workSeconds,
-                    restSeconds = restSeconds,
-                    rounds = rounds
-                )
-            )
+        composable(AppRoute.IntervalRunning.route) {
+            val viewModel: IntervalRunningViewModel = viewModel()
             val state by viewModel.state.collectAsState()
 
             IntervalRunningScreen(
                 state = state,
                 onBack = { navController.popBackStack() },
-                onPauseResume = viewModel::toggleRunning,
-                onReset = viewModel::reset
+                onPauseResume = { viewModel.toggleRunning(context) },
+                onReset = { viewModel.reset(context) }
             )
         }
 
@@ -123,50 +122,30 @@ fun BQuickApp(modifier: Modifier = Modifier) {
             RandomSoundSetupScreen(
                 state = state,
                 onBack = { navController.popBackStack() },
-                onDurationMinutesChange = viewModel::updateDurationMinutes,
+                onDurationSecondsChange = viewModel::updateDurationSeconds,
                 onMinGapSecondsChange = viewModel::updateMinGapSeconds,
                 onMaxGapSecondsChange = viewModel::updateMaxGapSeconds,
                 onStart = {
-                    navController.navigate(
-                        AppRoute.RandomSoundRunning.createRoute(
-                            durationMinutes = state.durationMinutes,
-                            minGapSeconds = state.minGapSeconds,
-                            maxGapSeconds = state.maxGapSeconds
-                        )
+                    TimerForegroundService.startReaction(
+                        context = context,
+                        durationSeconds = state.durationSeconds,
+                        minGapSeconds = state.minGapSeconds,
+                        maxGapSeconds = state.maxGapSeconds
                     )
+                    navController.navigate(AppRoute.RandomSoundRunning.route)
                 }
             )
         }
 
-        composable(
-            route = AppRoute.RandomSoundRunning.route,
-            arguments = listOf(
-                navArgument(AppRoute.RandomSoundRunning.DurationMinutesArg) { type = NavType.IntType },
-                navArgument(AppRoute.RandomSoundRunning.MinGapSecondsArg) { type = NavType.IntType },
-                navArgument(AppRoute.RandomSoundRunning.MaxGapSecondsArg) { type = NavType.IntType }
-            )
-        ) { backStackEntry ->
-            val durationMinutes =
-                backStackEntry.arguments?.getInt(AppRoute.RandomSoundRunning.DurationMinutesArg) ?: 5
-            val minGapSeconds =
-                backStackEntry.arguments?.getInt(AppRoute.RandomSoundRunning.MinGapSecondsArg) ?: 15
-            val maxGapSeconds =
-                backStackEntry.arguments?.getInt(AppRoute.RandomSoundRunning.MaxGapSecondsArg) ?: 45
-            val viewModel: RandomSoundRunningViewModel = viewModel(
-                key = "random-sound-$durationMinutes-$minGapSeconds-$maxGapSeconds",
-                factory = RandomSoundRunningViewModel.factory(
-                    durationMinutes = durationMinutes,
-                    minGapSeconds = minGapSeconds,
-                    maxGapSeconds = maxGapSeconds
-                )
-            )
+        composable(AppRoute.RandomSoundRunning.route) {
+            val viewModel: RandomSoundRunningViewModel = viewModel()
             val state by viewModel.state.collectAsState()
 
             RandomSoundRunningScreen(
                 state = state,
                 onBack = { navController.popBackStack() },
-                onPauseResume = viewModel::toggleRunning,
-                onReset = viewModel::reset
+                onPauseResume = { viewModel.toggleRunning(context) },
+                onReset = { viewModel.reset(context) }
             )
         }
     }

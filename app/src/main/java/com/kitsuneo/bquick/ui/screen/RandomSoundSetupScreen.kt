@@ -16,13 +16,14 @@ import com.kitsuneo.bquick.feature.randomsound.RandomSoundSetupUiState
 import com.kitsuneo.bquick.ui.component.AdjusterCard
 import com.kitsuneo.bquick.ui.component.MetricPill
 import com.kitsuneo.bquick.ui.component.ScreenFrame
+import com.kitsuneo.bquick.ui.component.TimeAdjusterCard
 import com.kitsuneo.bquick.ui.util.asClock
 
 @Composable
 fun RandomSoundSetupScreen(
     state: RandomSoundSetupUiState,
     onBack: () -> Unit,
-    onDurationMinutesChange: (Int) -> Unit,
+    onDurationSecondsChange: (Int) -> Unit,
     onMinGapSecondsChange: (Int) -> Unit,
     onMaxGapSecondsChange: (Int) -> Unit,
     onStart: () -> Unit,
@@ -39,31 +40,38 @@ fun RandomSoundSetupScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             MetricPill(label = "Session", value = state.totalSessionSeconds.asClock(), modifier = Modifier.weight(1f))
-            MetricPill(label = "Cue range", value = "${state.minGapSeconds}-${state.maxGapSeconds}s", modifier = Modifier.weight(1f))
+            MetricPill(
+                label = "Cue range",
+                value = "${state.minGapSeconds.asClock()}-${state.maxGapSeconds.asClock()}",
+                modifier = Modifier.weight(1f)
+            )
         }
 
-        AdjusterCard(
+        TimeAdjusterCard(
             label = "Duration",
-            value = "${state.durationMinutes} min",
+            seconds = state.durationSeconds,
             helper = "How long the drill should keep generating random cues.",
-            onDecrease = { onDurationMinutesChange(state.durationMinutes - 1) },
-            onIncrease = { onDurationMinutesChange(state.durationMinutes + 1) }
+            onSecondsChange = onDurationSecondsChange,
+            minSeconds = 10,
+            maxSeconds = 59 * 60 + 59
         )
 
-        AdjusterCard(
+        TimeAdjusterCard(
             label = "Minimum cue gap",
-            value = "${state.minGapSeconds}s",
+            seconds = state.minGapSeconds,
             helper = "Shortest time between consecutive sound cues.",
-            onDecrease = { onMinGapSecondsChange(state.minGapSeconds - 3) },
-            onIncrease = { onMinGapSecondsChange(state.minGapSeconds + 3) }
+            onSecondsChange = onMinGapSecondsChange,
+            minSeconds = 1,
+            maxSeconds = 59 * 60 + 59
         )
 
-        AdjusterCard(
+        TimeAdjusterCard(
             label = "Maximum cue gap",
-            value = "${state.maxGapSeconds}s",
+            seconds = state.maxGapSeconds,
             helper = "Longest wait before the next cue is allowed.",
-            onDecrease = { onMaxGapSecondsChange(state.maxGapSeconds - 3) },
-            onIncrease = { onMaxGapSecondsChange(state.maxGapSeconds + 3) }
+            onSecondsChange = onMaxGapSecondsChange,
+            minSeconds = state.minGapSeconds,
+            maxSeconds = 59 * 60 + 59
         )
 
         Card(

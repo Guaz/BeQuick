@@ -1,24 +1,16 @@
 package com.kitsuneo.bquick.feature.interval
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import com.kitsuneo.bquick.timer.ActiveTimerSession
+import com.kitsuneo.bquick.timer.IntervalPhase
+import com.kitsuneo.bquick.timer.TimerForegroundService
+import com.kitsuneo.bquick.timer.TimerSessionStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-
-enum class IntervalPhase {
-    Work,
-    Rest,
-    Complete
-}
 
 data class IntervalRunningUiState(
     val workSeconds: Int,
@@ -68,108 +60,49 @@ data class IntervalRunningUiState(
 }
 
 class IntervalRunningViewModel(
-    workSeconds: Int,
-    restSeconds: Int,
-    rounds: Int
 ) : ViewModel() {
     private val initialState = IntervalRunningUiState(
-        workSeconds = workSeconds.coerceIn(10, 180),
-        restSeconds = restSeconds.coerceIn(5, 120),
-        totalRounds = rounds.coerceIn(1, 20)
+        workSeconds = 40,
+        restSeconds = 20,
+        totalRounds = 8,
+        isRunning = false
     )
 
     private val _state = MutableStateFlow(initialState)
     val state: StateFlow<IntervalRunningUiState> = _state.asStateFlow()
 
-    private var timerJob: Job? = null
-
     init {
-        startTicker()
-    }
-
-    fun toggleRunning() {
-        if (_state.value.isComplete) return
-        _state.update { it.copy(isRunning = !it.isRunning) }
-        startTicker()
-    }
-
-    fun reset() {
-        _state.value = initialState
-        startTicker()
-    }
-
-    private fun startTicker() {
-        if (timerJob?.isActive == true) return
-        timerJob = viewModelScope.launch {
-            while (isActive) {
-                delay(1_000)
-                val current = _state.value
-                if (!current.isRunning || current.isComplete) continue
-                tick()
+        viewModelScope.launch {
+            TimerSessionStore.activeSession.collectLatest { session ->
+                val intervalSession = session as? ActiveTimerSession.Interval
+                _state.value = intervalSession?.toUiState() ?: initialState
             }
         }
     }
 
-    private fun tick() {
-        val current = _state.value
-        if (current.remainingPhaseSeconds > 1) {
-            _state.update { it.copy(remainingPhaseSeconds = it.remainingPhaseSeconds - 1) }
-            return
-        }
-
-        when (current.currentPhase) {
-            IntervalPhase.Work -> {
-                if (current.currentRound >= current.totalRounds) {
-                    _state.update {
-                        it.copy(
-                            currentPhase = IntervalPhase.Complete,
-                            remainingPhaseSeconds = 0,
-                            phaseDurationSeconds = 0,
-                            isRunning = false,
-                            isComplete = true
-                        )
-                    }
-                } else {
-                    _state.update {
-                        it.copy(
-                            currentPhase = IntervalPhase.Rest,
-                            phaseDurationSeconds = it.restSeconds,
-                            remainingPhaseSeconds = it.restSeconds
-                        )
-                    }
-                }
-            }
-
-            IntervalPhase.Rest -> {
-                _state.update {
-                    it.copy(
-                        currentRound = it.currentRound + 1,
-                        currentPhase = IntervalPhase.Work,
-                        phaseDurationSeconds = it.workSeconds,
-                        remainingPhaseSeconds = it.workSeconds
-                    )
-                }
-            }
-
-            IntervalPhase.Complete -> Unit
-        }
+    fun toggleRunning(context: android.content.Context) {
+        TimerForegroundService.sendAction(context, TimerForegroundService.ActionToggle)
     }
 
-    override fun onCleared() {
-        timerJob?.cancel()
-        super.onCleared()
+    fun reset(context: android.content.Context) {
+        TimerForegroundService.sendAction(context, TimerForegroundService.ActionReset)
     }
 
-    companion object {
-        fun factory(workSeconds: Int, restSeconds: Int, rounds: Int): ViewModelProvider.Factory =
-            viewModelFactory {
-                initializer {
-                    IntervalRunningViewModel(
-                        workSeconds = workSeconds,
-                        restSeconds = restSeconds,
-                        rounds = rounds
-                    )
-                }
-            }
+    fun stop(context: android.content.Context) {
+        TimerForegroundService.sendAction(context, TimerForegroundService.ActionStop)
+    }
+
+    private fun ActiveTimerSession.Interval.toUiState(): IntervalRunningUiState {
+        return IntervalRunningUiState(
+            workSeconds = workSeconds,
+            restSeconds = restSeconds,
+            totalRounds = totalRounds,
+            currentRound = currentRound,
+            currentPhase = currentPhase,
+            phaseDurationSeconds = phaseDurationSeconds,
+            remainingPhaseSeconds = remainingPhaseSeconds,
+            isRunning = isRunning,
+            isComplete = isComplete
+        )
     }
 }

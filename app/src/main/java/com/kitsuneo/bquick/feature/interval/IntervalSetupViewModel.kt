@@ -20,11 +20,11 @@ class IntervalSetupViewModel : ViewModel() {
     val state: StateFlow<IntervalSetupUiState> = _state.asStateFlow()
 
     fun updateWorkSeconds(value: Int) {
-        _state.update { it.copy(workSeconds = value.coerceIn(10, 180)) }
+        _state.update { it.copy(workSeconds = value.coerceIn(0, 180)) }
     }
 
     fun updateRestSeconds(value: Int) {
-        _state.update { it.copy(restSeconds = value.coerceIn(5, 120)) }
+        _state.update { it.copy(restSeconds = value.coerceIn(0, 120)) }
     }
 
     fun updateRounds(value: Int) {

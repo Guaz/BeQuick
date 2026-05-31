@@ -15,8 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.kitsuneo.bquick.feature.interval.IntervalPhase
 import com.kitsuneo.bquick.feature.interval.IntervalRunningUiState
+import com.kitsuneo.bquick.timer.IntervalPhase
 import com.kitsuneo.bquick.ui.component.MetricPill
 import com.kitsuneo.bquick.ui.component.ScreenFrame
 import com.kitsuneo.bquick.ui.component.StatusCard

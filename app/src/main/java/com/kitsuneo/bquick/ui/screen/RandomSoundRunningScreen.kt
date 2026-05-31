@@ -1,7 +1,5 @@
 package com.kitsuneo.bquick.ui.screen
 
-import android.media.AudioManager
-import android.media.ToneGenerator
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,9 +12,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kitsuneo.bquick.feature.randomsound.RandomSoundRunningUiState
@@ -33,20 +28,6 @@ fun RandomSoundRunningScreen(
     onReset: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100) }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            toneGenerator.release()
-        }
-    }
-
-    LaunchedEffect(state.soundEventId) {
-        if (state.soundEventId > 0) {
-            toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2, 250)
-        }
-    }
-
     ScreenFrame(
         title = "Random sound running",
         subtitle = "Cue ${state.cueCount + 1} will fire in a random window.",

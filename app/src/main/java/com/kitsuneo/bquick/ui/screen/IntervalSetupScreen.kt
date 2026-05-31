@@ -13,9 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kitsuneo.bquick.feature.interval.IntervalSetupUiState
-import com.kitsuneo.bquick.ui.component.AdjusterCard
 import com.kitsuneo.bquick.ui.component.MetricPill
+import com.kitsuneo.bquick.ui.component.NumberAdjusterCard
 import com.kitsuneo.bquick.ui.component.ScreenFrame
+import com.kitsuneo.bquick.ui.component.TimeAdjusterCard
 import com.kitsuneo.bquick.ui.util.asClock
 
 @Composable
@@ -28,6 +29,8 @@ fun IntervalSetupScreen(
     onStart: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val startEnabled = state.workSeconds > 0 || state.restSeconds > 0
+
     ScreenFrame(
         title = "Interval setup",
         subtitle = "Replicates the BFast interval flow, now as a real Compose + MVVM timer.",
@@ -42,28 +45,31 @@ fun IntervalSetupScreen(
             MetricPill(label = "Rounds", value = state.rounds.toString(), modifier = Modifier.weight(1f))
         }
 
-        AdjusterCard(
+        TimeAdjusterCard(
             label = "Work window",
-            value = "${state.workSeconds}s",
+            seconds = state.workSeconds,
             helper = "The active part of each round.",
-            onDecrease = { onWorkSecondsChange(state.workSeconds - 5) },
-            onIncrease = { onWorkSecondsChange(state.workSeconds + 5) }
+            onSecondsChange = onWorkSecondsChange,
+            minSeconds = 0,
+            maxSeconds = 180
         )
 
-        AdjusterCard(
+        TimeAdjusterCard(
             label = "Rest window",
-            value = "${state.restSeconds}s",
+            seconds = state.restSeconds,
             helper = "Recovery time between work rounds.",
-            onDecrease = { onRestSecondsChange(state.restSeconds - 5) },
-            onIncrease = { onRestSecondsChange(state.restSeconds + 5) }
+            onSecondsChange = onRestSecondsChange,
+            minSeconds = 0,
+            maxSeconds = 120
         )
 
-        AdjusterCard(
+        NumberAdjusterCard(
             label = "Rounds",
-            value = state.rounds.toString(),
+            value = state.rounds,
             helper = "How many work blocks the session should run.",
-            onDecrease = { onRoundsChange(state.rounds - 1) },
-            onIncrease = { onRoundsChange(state.rounds + 1) }
+            onValueChange = onRoundsChange,
+            minValue = 1,
+            maxValue = 20
         )
 
         Card(
@@ -74,7 +80,10 @@ fun IntervalSetupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Button(onClick = onStart) {
+                Button(
+                    onClick = onStart,
+                    enabled = startEnabled
+                ) {
                     Text(
                         text = "Start interval session",
                         fontWeight = FontWeight.Bold

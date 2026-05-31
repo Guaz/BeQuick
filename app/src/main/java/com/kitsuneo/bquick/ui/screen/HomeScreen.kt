@@ -22,6 +22,7 @@ fun HomeScreen(
     state: HomeUiState,
     onOpenInterval: () -> Unit,
     onOpenRandomSound: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     ScreenFrame(
@@ -49,6 +50,7 @@ fun HomeScreen(
                     Text(
                         text = feature.title,
                         style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
@@ -64,6 +66,55 @@ fun HomeScreen(
                             Text(text = feature.primaryAction)
                         }
                     }
+                }
+            }
+        }
+
+        SettingsEntryCard(
+            modeSwitchSoundLabel = state.modeSwitchSoundLabel,
+            reactionSoundLabel = state.reactionSoundLabel,
+            onOpenSettings = onOpenSettings
+        )
+    }
+}
+
+@Composable
+private fun SettingsEntryCard(
+    modeSwitchSoundLabel: String,
+    reactionSoundLabel: String,
+    onOpenSettings: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
+        shape = MaterialTheme.shapes.extraLarge
+    ) {
+        Column(
+            modifier = Modifier.padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Settings",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Mode switch sound: $modeSwitchSoundLabel",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "Reaction cue sound: $reactionSoundLabel",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(onClick = onOpenSettings) {
+                    Text(text = "Open settings")
                 }
             }
         }

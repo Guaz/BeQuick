@@ -8,11 +8,11 @@ import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
     primary = SignalBlue,
-    onPrimary = Midnight,
+    onPrimary = Mist,
     primaryContainer = SignalBlueDeep,
     onPrimaryContainer = Mist,
     secondary = LimeFlash,
-    onSecondary = Midnight,
+    onSecondary = Mist,
     background = Midnight,
     onBackground = Mist,
     surface = Slate,
