@@ -1,17 +1,14 @@
 package com.kitsuneo.bquick.notification
 
-import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import com.kitsuneo.bquick.MainActivity
 import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.timer.TimerForegroundService
@@ -58,11 +55,6 @@ object TimerNotificationManager {
             .build()
     }
 
-    fun show(context: Context, state: TimerNotificationState) {
-        if (!canPostNotifications(context)) return
-        NotificationManagerCompat.from(context).notify(notificationId, build(context, state))
-    }
-
     fun cancel(context: Context) {
         NotificationManagerCompat.from(context).cancel(notificationId)
     }
@@ -79,13 +71,5 @@ object TimerNotificationManager {
             description = context.getString(R.string.timer_notification_channel_description)
         }
         notificationManager.createNotificationChannel(channel)
-    }
-
-    private fun canPostNotifications(context: Context): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
     }
 }

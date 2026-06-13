@@ -49,9 +49,9 @@ import com.kitsuneo.bquick.ui.util.toClockSecondsOrNull
 
 @Composable
 fun ScreenFrame(
+    modifier: Modifier = Modifier,
     title: String = "",
     subtitle: String = "",
-    modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     actions: @Composable (() -> Unit)? = null,
     showHeader: Boolean = true,

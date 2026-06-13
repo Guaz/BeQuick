@@ -1,6 +1,7 @@
 package com.kitsuneo.bquick.alarm
 
 import android.content.Context
+import androidx.core.content.edit
 import com.kitsuneo.bquick.settings.BuiltInSound
 import com.kitsuneo.bquick.settings.SoundSelection
 import com.kitsuneo.bquick.settings.SoundSelectionCodec
@@ -120,10 +121,9 @@ object AlarmRepository {
                 )
             }
         }.toString()
-        appContext.getSharedPreferences(PrefName, Context.MODE_PRIVATE)
-            .edit()
-            .putString(AlarmsKey, encoded)
-            .apply()
+        appContext.getSharedPreferences(PrefName, Context.MODE_PRIVATE).edit {
+            putString(AlarmsKey, encoded)
+        }
         AlarmScheduler.sync(appContext, _alarms.value)
     }
 

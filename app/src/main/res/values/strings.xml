@@ -42,7 +42,6 @@
     <string name="settings_mode_switch_sound_title">Mode switch sound</string>
     <string name="settings_reaction_sound_title">Reaction cue sound</string>
     <string name="current_value">Current: %1$s</string>
-    <string name="choose_media">Choose media</string>
     <string name="selected_media">Selected media</string>
     <string name="language_english">English</string>
     <string name="language_polish">Polski</string>
@@ -106,14 +105,14 @@
     <string name="interval_complete_message">All rounds are done. Use Back to return or Reset to run the session again.</string>
 
     <string name="random_running_title">Random sound running</string>
-    <string name="random_running_subtitle">Cue %1$d will fire in a random window.</string>
+    <string name="random_running_subtitle">Random window for cue %1$d.</string>
     <string name="cues_fired">Cues fired</string>
     <string name="random_next_cue">Next cue</string>
     <string name="random_complete_support">The drill ended. Reset to run it again.</string>
     <string name="random_running_support">Stay alert for the next sound trigger.</string>
 
     <string name="alarms_title">Alarms</string>
-    <string name="alarms_summary">%1$d enabled out of %2$d alarms.</string>
+    <string name="alarms_summary">Enabled alarms: %1$d / %2$d</string>
     <string name="alarms_empty">No alarms yet. Use the button below to create your first alarm.</string>
     <string name="create_new_alarm">Create new alarm</string>
     <string name="new_alarm">New alarm</string>
@@ -149,14 +148,6 @@
     <string name="weekday_short_friday">Fri</string>
     <string name="weekday_short_saturday">Sat</string>
     <string name="weekday_short_sunday">Sun</string>
-    <string name="weekday_full_monday">Monday</string>
-    <string name="weekday_full_tuesday">Tuesday</string>
-    <string name="weekday_full_wednesday">Wednesday</string>
-    <string name="weekday_full_thursday">Thursday</string>
-    <string name="weekday_full_friday">Friday</string>
-    <string name="weekday_full_saturday">Saturday</string>
-    <string name="weekday_full_sunday">Sunday</string>
-
     <plurals name="duration_days">
         <item quantity="one">%d day</item>
         <item quantity="other">%d days</item>

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kitsuneo.bquick.alarm.AlarmEntry
 import com.kitsuneo.bquick.alarm.AlarmRepository
-import com.kitsuneo.bquick.alarm.AlarmScheduler
 import com.kitsuneo.bquick.alarm.AlarmTriggerDelta
 import com.kitsuneo.bquick.alarm.AlarmWeekday
 import com.kitsuneo.bquick.alarm.nextTriggerDelta
@@ -32,9 +31,6 @@ data class AlarmDraftUiState(
     val snoozeEnabled: Boolean = true,
     val name: String = ""
 ) {
-    val timeText: String
-        get() = "%02d:%02d".format(hour, minute)
-
     fun triggerDelta(nowMillis: Long = System.currentTimeMillis()): AlarmTriggerDelta {
         return AlarmEntry(
             id = -1,

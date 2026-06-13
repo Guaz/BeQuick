@@ -1,15 +1,17 @@
 package com.kitsuneo.bquick.settings
 
 import android.content.Context
+import android.content.res.Configuration
+import android.os.LocaleList
 import androidx.annotation.RawRes
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
+import androidx.core.content.edit
 import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.home.HomeDestination
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.Locale
 
 enum class SoundTarget {
     ModeSwitch,
@@ -152,13 +154,12 @@ object SoundLibraryRepository {
     private fun persist(sounds: List<SoundSelection.Custom>) {
         if (!::appContext.isInitialized) return
         _customSounds.value = sounds
-        appContext.getSharedPreferences(PrefName, Context.MODE_PRIVATE)
-            .edit()
-            .putStringSet(
+        appContext.getSharedPreferences(PrefName, Context.MODE_PRIVATE).edit {
+            putStringSet(
                 CustomSoundsKey,
                 sounds.map(SoundSelectionCodec::encode).toSet()
             )
-            .apply()
+        }
     }
 }
 
@@ -178,11 +179,11 @@ object SoundSettingsRepository {
     fun initialize(context: Context) {
         appContext = context.applicationContext
         _settings.value = load()
-        applyAppLanguage(_settings.value.appLanguage)
+        applyAppLanguage(appContext, _settings.value.appLanguage)
     }
 
     fun applyStoredAppLanguage(context: Context) {
-        applyAppLanguage(resolveLanguage(context))
+        applyAppLanguage(context, resolveLanguage(context))
     }
 
     fun updateBuiltIn(target: SoundTarget, sound: BuiltInSound) {
@@ -214,7 +215,9 @@ object SoundSettingsRepository {
     fun updateAppLanguage(language: AppLanguage) {
         val updated = _settings.value.copy(appLanguage = language)
         persist(updated)
-        applyAppLanguage(language)
+        if (::appContext.isInitialized) {
+            applyAppLanguage(appContext, language)
+        }
     }
 
     private fun load(): SoundSettings {
@@ -242,19 +245,18 @@ object SoundSettingsRepository {
     private fun persist(settings: SoundSettings) {
         if (!::appContext.isInitialized) return
         _settings.value = settings
-        val prefs = appContext.getSharedPreferences(PrefName, Context.MODE_PRIVATE)
-        prefs.edit()
-            .putString(ModeSwitchKey, SoundSelectionCodec.encode(settings.modeSwitch))
-            .putString(ModeSwitchLabelKey, settings.modeSwitch.label)
-            .putString(ReactionKey, SoundSelectionCodec.encode(settings.reaction))
-            .putString(ReactionLabelKey, settings.reaction.label)
-            .putString(
+        appContext.getSharedPreferences(PrefName, Context.MODE_PRIVATE).edit {
+            putString(ModeSwitchKey, SoundSelectionCodec.encode(settings.modeSwitch))
+            putString(ModeSwitchLabelKey, settings.modeSwitch.label)
+            putString(ReactionKey, SoundSelectionCodec.encode(settings.reaction))
+            putString(ReactionLabelKey, settings.reaction.label)
+            putString(
                 HomeOrderKey,
                 normalizeHomeOrder(settings.homeOrder).joinToString(separator = ",") { it.name }
             )
-            .putString(AlarmTimeFormatKey, settings.alarmTimeFormat.name)
-            .putString(AppLanguageKey, settings.appLanguage.languageTag)
-            .apply()
+            putString(AlarmTimeFormatKey, settings.alarmTimeFormat.name)
+            putString(AppLanguageKey, settings.appLanguage.languageTag)
+        }
     }
 
     private fun decodeHomeOrder(encoded: String?): List<HomeDestination> {
@@ -281,8 +283,24 @@ object SoundSettingsRepository {
             ?: AppLanguage.fromDeviceLocale()
     }
 
-    private fun applyAppLanguage(language: AppLanguage) {
-        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(language.languageTag))
+    private fun applyAppLanguage(context: Context, language: AppLanguage) {
+        val locale = Locale.forLanguageTag(language.languageTag)
+        Locale.setDefault(locale)
+        updateResourcesConfiguration(context, locale)
+        if (context.applicationContext !== context) {
+            updateResourcesConfiguration(context.applicationContext, locale)
+        }
+    }
+
+    private fun updateResourcesConfiguration(context: Context, locale: Locale) {
+        val resources = context.resources
+        val configuration = Configuration(resources.configuration).apply {
+            setLocale(locale)
+            setLocales(LocaleList(locale))
+            setLayoutDirection(locale)
+        }
+        @Suppress("DEPRECATION")
+        resources.updateConfiguration(configuration, resources.displayMetrics)
     }
 }
 

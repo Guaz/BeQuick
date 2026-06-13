@@ -11,23 +11,21 @@ import java.util.Calendar
 
 enum class AlarmWeekday(
     val calendarDay: Int,
-    @StringRes val shortLabelRes: Int,
-    @StringRes val fullLabelRes: Int
+    @StringRes val shortLabelRes: Int
 ) {
-    Monday(Calendar.MONDAY, R.string.weekday_short_monday, R.string.weekday_full_monday),
-    Tuesday(Calendar.TUESDAY, R.string.weekday_short_tuesday, R.string.weekday_full_tuesday),
-    Wednesday(Calendar.WEDNESDAY, R.string.weekday_short_wednesday, R.string.weekday_full_wednesday),
-    Thursday(Calendar.THURSDAY, R.string.weekday_short_thursday, R.string.weekday_full_thursday),
-    Friday(Calendar.FRIDAY, R.string.weekday_short_friday, R.string.weekday_full_friday),
-    Saturday(Calendar.SATURDAY, R.string.weekday_short_saturday, R.string.weekday_full_saturday),
-    Sunday(Calendar.SUNDAY, R.string.weekday_short_sunday, R.string.weekday_full_sunday);
+    Monday(Calendar.MONDAY, R.string.weekday_short_monday),
+    Tuesday(Calendar.TUESDAY, R.string.weekday_short_tuesday),
+    Wednesday(Calendar.WEDNESDAY, R.string.weekday_short_wednesday),
+    Thursday(Calendar.THURSDAY, R.string.weekday_short_thursday),
+    Friday(Calendar.FRIDAY, R.string.weekday_short_friday),
+    Saturday(Calendar.SATURDAY, R.string.weekday_short_saturday),
+    Sunday(Calendar.SUNDAY, R.string.weekday_short_sunday);
 
     companion object {
         fun fromCalendarDay(day: Int): AlarmWeekday? = entries.firstOrNull { it.calendarDay == day }
     }
 
     fun shortLabel(context: Context): String = context.getString(shortLabelRes)
-    fun fullLabel(context: Context): String = context.getString(fullLabelRes)
 }
 
 data class AlarmEntry(

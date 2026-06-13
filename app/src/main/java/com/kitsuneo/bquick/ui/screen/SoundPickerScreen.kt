@@ -43,7 +43,6 @@ fun SoundPickerScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val dimensions = BQuickTheme.dimensions
     val customSounds = remember(importedSounds, currentSelection) {
         buildList {
             if (currentSelection is SoundSelection.Custom) {

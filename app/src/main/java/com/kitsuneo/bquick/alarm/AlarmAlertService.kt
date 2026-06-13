@@ -7,7 +7,6 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.os.VibrationEffect
@@ -16,8 +15,8 @@ import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.kitsuneo.bquick.R
-import com.kitsuneo.bquick.settings.BuiltInSound
 import com.kitsuneo.bquick.settings.SoundSelection
 import com.kitsuneo.bquick.settings.SoundSettingsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -90,7 +89,7 @@ class AlarmAlertService : Service() {
     }
 
     private fun applyAlarmVolume(alarm: AlarmEntry) {
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
         previousAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
         val targetVolume = (maxVolume * (alarm.volumePercent / 100f)).toInt().coerceIn(0, maxVolume)
@@ -103,7 +102,7 @@ class AlarmAlertService : Service() {
     }
 
     private fun startFadeUp(alarm: AlarmEntry) {
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
         val targetVolume = (maxVolume * (alarm.volumePercent / 100f)).toInt().coerceIn(0, maxVolume)
         if (targetVolume <= 0) return
@@ -120,14 +119,19 @@ class AlarmAlertService : Service() {
 
     private fun startVibration() {
         vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val manager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val manager = getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager
             manager.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
-            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            getSystemService(VIBRATOR_SERVICE) as Vibrator
         }
-        val effect = VibrationEffect.createWaveform(longArrayOf(0, 500, 500), 0)
-        vibrator?.vibrate(effect)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val effect = VibrationEffect.createWaveform(longArrayOf(0, 500, 500), 0)
+            vibrator?.vibrate(effect)
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator?.vibrate(longArrayOf(0, 500, 500), 0)
+        }
     }
 
     private fun stopAlarmPlayback() {
@@ -143,7 +147,7 @@ class AlarmAlertService : Service() {
 
     private fun restoreAlarmVolume() {
         val previous = previousAlarmVolume ?: return
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         audioManager.setStreamVolume(AudioManager.STREAM_ALARM, previous, 0)
         previousAlarmVolume = null
     }
@@ -176,7 +180,6 @@ class AlarmAlertService : Service() {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setContentIntent(alertPendingIntent)
-            .setFullScreenIntent(alertPendingIntent, true)
             .addAction(
                 android.R.drawable.ic_media_pause,
                 getString(R.string.dismiss),
@@ -217,8 +220,8 @@ class AlarmAlertService : Service() {
     }
 
     private fun resolveSoundUri(selection: SoundSelection) = when (selection) {
-        is SoundSelection.Custom -> android.net.Uri.parse(selection.uri)
-        is SoundSelection.BuiltIn -> Uri.parse("android.resource://$packageName/${selection.sound.rawResId}")
+        is SoundSelection.Custom -> selection.uri.toUri()
+        is SoundSelection.BuiltIn -> "android.resource://$packageName/${selection.sound.rawResId}".toUri()
     }
 
     companion object {

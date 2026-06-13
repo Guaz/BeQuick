@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.randomsound.RandomSoundSetupUiState
 import com.kitsuneo.bquick.ui.component.MetricPill

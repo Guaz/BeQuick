@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import com.kitsuneo.bquick.MainActivity
 import java.util.Calendar
 
@@ -28,12 +29,15 @@ object AlarmScheduler {
 
     fun scheduleSnooze(context: Context, alarm: AlarmEntry, afterMinutes: Int = 5) {
         val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (!canScheduleExactAlarms(manager)) return
         val pendingIntent = snoozePendingIntent(context, alarm)
         val triggerAtMillis = System.currentTimeMillis() + afterMinutes * 60_000L
-        manager.setAlarmClock(
-            AlarmManager.AlarmClockInfo(triggerAtMillis, launchPendingIntent(context, alarm.id + 100_000)),
-            pendingIntent
-        )
+        runCatching {
+            manager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(triggerAtMillis, launchPendingIntent(context, alarm.id + 100_000)),
+                pendingIntent
+            )
+        }
     }
 
     fun cancel(context: Context, alarmId: Int) {
@@ -68,12 +72,19 @@ object AlarmScheduler {
     }
 
     private fun schedule(context: Context, alarm: AlarmEntry, manager: AlarmManager) {
+        if (!canScheduleExactAlarms(manager)) return
         val triggerAtMillis = nextTriggerAtMillis(alarm)
         val operation = pendingIntent(context, alarm.id)
-        manager.setAlarmClock(
-            AlarmManager.AlarmClockInfo(triggerAtMillis, launchPendingIntent(context, alarm.id)),
-            operation
-        )
+        runCatching {
+            manager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(triggerAtMillis, launchPendingIntent(context, alarm.id)),
+                operation
+            )
+        }
+    }
+
+    private fun canScheduleExactAlarms(manager: AlarmManager): Boolean {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || manager.canScheduleExactAlarms()
     }
 
     private fun launchPendingIntent(context: Context, requestCode: Int): PendingIntent {

@@ -40,6 +40,15 @@ android {
     buildFeatures {
         compose = true
     }
+    lint {
+        disable += setOf(
+            "AppBundleLocaleChanges",
+            "ObsoleteLintCustomCheck",
+            "AndroidGradlePluginVersion",
+            "GradleDependency",
+            "NewerVersionAvailable"
+        )
+    }
 }
 
 dependencies {

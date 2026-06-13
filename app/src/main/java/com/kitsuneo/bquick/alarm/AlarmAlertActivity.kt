@@ -8,9 +8,9 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -20,7 +20,7 @@ import com.kitsuneo.bquick.settings.SoundSettingsRepository
 import com.kitsuneo.bquick.ui.screen.AlarmAlertScreen
 import com.kitsuneo.bquick.ui.theme.BQuickTheme
 
-class AlarmAlertActivity : AppCompatActivity() {
+class AlarmAlertActivity : ComponentActivity() {
     private var alertState by mutableStateOf(AlarmAlertUiState())
     private var isCloseReceiverRegistered = false
 
@@ -127,7 +127,7 @@ class AlarmAlertActivity : AppCompatActivity() {
                 context,
                 alarm.id + 90_000,
                 createIntent(context, alarm, timeText).apply {
-                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 },
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )

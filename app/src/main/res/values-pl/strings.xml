@@ -44,7 +44,6 @@
     <string name="settings_mode_switch_sound_title">Dźwięk zmiany trybu</string>
     <string name="settings_reaction_sound_title">Dźwięk sygnału reakcji</string>
     <string name="current_value">Aktualnie: %1$s</string>
-    <string name="choose_media">Wybierz z pamięci</string>
     <string name="selected_media">Wybrany plik</string>
     <string name="language_english">English</string>
     <string name="language_polish">Polski</string>
@@ -108,14 +107,14 @@
     <string name="interval_complete_message">Wszystkie rundy są zakończone. Użyj Wstecz, aby wrócić, albo Resetuj, aby uruchomić sesję ponownie.</string>
 
     <string name="random_running_title">Trwa sesja losowych dźwięków</string>
-    <string name="random_running_subtitle">Sygnał %1$d pojawi się w losowym oknie czasowym.</string>
+    <string name="random_running_subtitle">Losowe okno dla sygnału %1$d.</string>
     <string name="cues_fired">Wyemitowane sygnały</string>
     <string name="random_next_cue">Następny sygnał</string>
     <string name="random_complete_support">Trening zakończył się. Zresetuj, aby uruchomić go ponownie.</string>
     <string name="random_running_support">Zachowaj czujność na kolejny sygnał.</string>
 
     <string name="alarms_title">Alarmy</string>
-    <string name="alarms_summary">%1$d włączonych z %2$d alarmów.</string>
+    <string name="alarms_summary">Włączone alarmy: %1$d / %2$d</string>
     <string name="alarms_empty">Nie ma jeszcze alarmów. Użyj przycisku poniżej, aby utworzyć pierwszy alarm.</string>
     <string name="create_new_alarm">Utwórz nowy alarm</string>
     <string name="new_alarm">Nowy alarm</string>
@@ -151,14 +150,6 @@
     <string name="weekday_short_friday">Pt</string>
     <string name="weekday_short_saturday">Sob</string>
     <string name="weekday_short_sunday">Ndz</string>
-    <string name="weekday_full_monday">Poniedziałek</string>
-    <string name="weekday_full_tuesday">Wtorek</string>
-    <string name="weekday_full_wednesday">Środa</string>
-    <string name="weekday_full_thursday">Czwartek</string>
-    <string name="weekday_full_friday">Piątek</string>
-    <string name="weekday_full_saturday">Sobota</string>
-    <string name="weekday_full_sunday">Niedziela</string>
-
     <plurals name="duration_days">
         <item quantity="one">%d dzień</item>
         <item quantity="few">%d dni</item>

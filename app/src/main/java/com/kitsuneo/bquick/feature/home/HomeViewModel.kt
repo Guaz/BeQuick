@@ -8,7 +8,6 @@ import com.kitsuneo.bquick.settings.AppLanguage
 import com.kitsuneo.bquick.settings.BuiltInSound
 import com.kitsuneo.bquick.settings.SoundSelection
 import com.kitsuneo.bquick.settings.SoundSettingsRepository
-import com.kitsuneo.bquick.settings.SoundTarget
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,14 +53,6 @@ class HomeViewModel : ViewModel() {
                 _state.value = updatedState
             }
         }
-    }
-
-    fun selectBuiltInSound(target: SoundTarget, sound: BuiltInSound) {
-        SoundSettingsRepository.updateBuiltIn(target, sound)
-    }
-
-    fun selectCustomSound(target: SoundTarget, uri: String, label: String) {
-        SoundSettingsRepository.updateCustom(target, uri, label)
     }
 
     fun updateAlarmTimeFormat(format: AlarmTimeFormat) {

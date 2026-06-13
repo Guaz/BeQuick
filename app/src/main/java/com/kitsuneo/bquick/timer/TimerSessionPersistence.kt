@@ -1,17 +1,18 @@
 package com.kitsuneo.bquick.timer
 
 import android.content.Context
+import androidx.core.content.edit
 
-class TimerSessionPersistence(private val context: Context) {
+class TimerSessionPersistence(context: Context) {
     private val prefs = context.getSharedPreferences("timer_session", Context.MODE_PRIVATE)
 
     fun save(session: ActiveTimerSession?) {
         if (session == null) {
-            prefs.edit().clear().apply()
+            prefs.edit { clear() }
             return
         }
 
-        prefs.edit().apply {
+        prefs.edit {
             when (session) {
                 is ActiveTimerSession.Interval -> {
                     putString("type", "interval")
@@ -40,7 +41,6 @@ class TimerSessionPersistence(private val context: Context) {
                 }
             }
             putLong("updatedAtMillis", System.currentTimeMillis())
-            apply()
         }
     }
 

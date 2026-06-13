@@ -2,7 +2,7 @@ package com.kitsuneo.bquick.audio
 
 import android.content.Context
 import android.media.MediaPlayer
-import android.net.Uri
+import androidx.core.net.toUri
 import com.kitsuneo.bquick.settings.SoundSelection
 
 object AppSoundPlayer {
@@ -12,7 +12,7 @@ object AppSoundPlayer {
         mediaPlayer?.release()
         mediaPlayer = when (selection) {
             is SoundSelection.BuiltIn -> MediaPlayer.create(context, selection.sound.rawResId)
-            is SoundSelection.Custom -> MediaPlayer.create(context, Uri.parse(selection.uri))
+            is SoundSelection.Custom -> MediaPlayer.create(context, selection.uri.toUri())
         }?.apply {
             setOnCompletionListener {
                 it.release()
