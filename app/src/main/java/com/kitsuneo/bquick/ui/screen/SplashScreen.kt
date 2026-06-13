@@ -4,8 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,12 +22,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.splash.SplashUiState
+import com.kitsuneo.bquick.ui.theme.BQuickTheme
 
 @Composable
 fun SplashScreen(
     state: SplashUiState,
     modifier: Modifier = Modifier
 ) {
+    val dimensions = BQuickTheme.dimensions
     val background = Brush.linearGradient(
         colors = listOf(
             MaterialTheme.colorScheme.primary,
@@ -35,11 +42,16 @@ fun SplashScreen(
         modifier = modifier
             .fillMaxSize()
             .background(background)
-            .padding(32.dp),
+            .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(
+                    WindowInsetsSides.Horizontal + WindowInsetsSides.Vertical
+                )
+            )
+            .padding(dimensions.space4),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space1),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(

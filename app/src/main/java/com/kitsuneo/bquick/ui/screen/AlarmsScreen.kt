@@ -1,9 +1,5 @@
 package com.kitsuneo.bquick.ui.screen
 
-import android.content.Intent
-import android.provider.OpenableColumns
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,11 +8,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -50,8 +51,8 @@ import com.kitsuneo.bquick.alarm.AlarmWeekday
 import com.kitsuneo.bquick.alarm.format
 import com.kitsuneo.bquick.feature.alarm.AlarmDraftUiState
 import com.kitsuneo.bquick.feature.alarm.AlarmsUiState
-import com.kitsuneo.bquick.settings.BuiltInSound
 import com.kitsuneo.bquick.settings.displayLabel
+import com.kitsuneo.bquick.ui.theme.BQuickTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -65,6 +66,7 @@ fun AlarmsScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val dimensions = BQuickTheme.dimensions
     val background = Brush.verticalGradient(
         colors = listOf(
             MaterialTheme.colorScheme.background,
@@ -76,13 +78,19 @@ fun AlarmsScreen(
         modifier = modifier
             .fillMaxSize()
             .background(background)
-            .statusBarsPadding(),
+            .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(
+                    WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                )
+            ),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp)
+                    .navigationBarsPadding()
+                    .padding(dimensions.space2)
             ) {
                 Button(
                     onClick = onOpenCreateAlarm,
@@ -97,9 +105,9 @@ fun AlarmsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = dimensions.space2),
+            contentPadding = PaddingValues(vertical = dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             item {
                 Row(
@@ -132,7 +140,7 @@ fun AlarmsScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.alarms_empty),
-                            modifier = Modifier.padding(22.dp),
+                            modifier = Modifier.padding(dimensions.space2),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -160,8 +168,7 @@ fun AlarmCreateScreen(
     onHourChange: (Int) -> Unit,
     onMinuteChange: (Int) -> Unit,
     onToggleWeekday: (AlarmWeekday) -> Unit,
-    onSelectBuiltInSound: (BuiltInSound) -> Unit,
-    onSelectCustomSound: (String, String) -> Unit,
+    onOpenSoundPicker: () -> Unit,
     onVolumeChange: (Int) -> Unit,
     onFadeUpChange: (Boolean) -> Unit,
     onVibrateChange: (Boolean) -> Unit,
@@ -172,26 +179,7 @@ fun AlarmCreateScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val pickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        if (uri != null) {
-            context.contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-            val label = context.contentResolver.query(
-                uri,
-                arrayOf(OpenableColumns.DISPLAY_NAME),
-                null,
-                null,
-                null
-            )?.use { cursor ->
-                if (cursor.moveToFirst()) cursor.getString(0) else null
-            } ?: context.getString(R.string.selected_media)
-            onSelectCustomSound(uri.toString(), label)
-        }
-    }
+    val dimensions = BQuickTheme.dimensions
     val background = Brush.verticalGradient(
         colors = listOf(
             MaterialTheme.colorScheme.background,
@@ -203,13 +191,19 @@ fun AlarmCreateScreen(
         modifier = modifier
             .fillMaxSize()
             .background(background)
-            .statusBarsPadding(),
+            .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(
+                    WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                )
+            ),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp)
+                    .navigationBarsPadding()
+                    .padding(dimensions.space2)
             ) {
                 Button(
                     onClick = onSaveAlarm,
@@ -239,9 +233,9 @@ fun AlarmCreateScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = dimensions.space2),
+            contentPadding = PaddingValues(vertical = dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             item {
                 Row(
@@ -288,8 +282,7 @@ fun AlarmCreateScreen(
             item {
                 SoundPickerCard(
                     currentLabel = state.soundSelection.displayLabel(context),
-                    onSelectBuiltInSound = onSelectBuiltInSound,
-                    onPickCustomSound = { pickerLauncher.launch(arrayOf("audio/*")) }
+                    onOpenSoundPicker = onOpenSoundPicker
                 )
             }
             item {
@@ -339,13 +332,14 @@ private fun HeaderCard(
     title: String,
     subtitle: String
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)),
-        shape = RoundedCornerShape(28.dp)
+        shape = RoundedCornerShape(dimensions.space3)
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(dimensions.space3),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
             Text(
                 text = title,
@@ -370,6 +364,7 @@ private fun AlarmListRow(
     onOpenEdit: () -> Unit,
     onToggle: () -> Unit
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -380,12 +375,12 @@ private fun AlarmListRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(22.dp),
+                .padding(dimensions.space2),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(dimensions.space05)
             ) {
                 Text(
                     text = alarm.displayName(context),
@@ -418,14 +413,15 @@ private fun TimePickerCard(
     onHourChange: (Int) -> Unit,
     onMinuteChange: (Int) -> Unit
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
         shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             Text(
                 text = stringResource(R.string.time),
@@ -434,7 +430,7 @@ private fun TimePickerCard(
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(dimensions.space2)
             ) {
                 WheelPicker(
                     label = stringResource(R.string.hour),
@@ -463,6 +459,7 @@ private fun WheelPicker(
     onSelectedChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dimensions = BQuickTheme.dimensions
     val values = remember(range) { range.toList() }
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = selected.coerceIn(range.first, range.last))
 
@@ -486,7 +483,7 @@ private fun WheelPicker(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(dimensions.space1)
     ) {
         Text(
             text = label,
@@ -494,21 +491,21 @@ private fun WheelPicker(
             fontWeight = FontWeight.SemiBold
         )
         Card(
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(dimensions.space3),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier.height(180.dp),
                 contentPadding = PaddingValues(vertical = 60.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(dimensions.space1)
             ) {
                 items(values, key = { it }) { value ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onSelectedChange(value) }
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = dimensions.space1),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -537,14 +534,15 @@ private fun RepeatDaysCard(
     selectedDays: Set<AlarmWeekday>,
     onToggleDay: (AlarmWeekday) -> Unit
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
         shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             Text(
                 text = stringResource(R.string.repeat),
@@ -557,7 +555,7 @@ private fun RepeatDaysCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
             ) {
                 items(AlarmWeekday.entries, key = { it.name }) { day ->
                     FilterChip(
@@ -574,17 +572,17 @@ private fun RepeatDaysCard(
 @Composable
 private fun SoundPickerCard(
     currentLabel: String,
-    onSelectBuiltInSound: (BuiltInSound) -> Unit,
-    onPickCustomSound: () -> Unit
+    onOpenSoundPicker: () -> Unit
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
         shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             Text(
                 text = stringResource(R.string.alarm_sound),
@@ -596,26 +594,16 @@ private fun SoundPickerCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                BuiltInSound.entries.forEach { sound ->
-                    Button(onClick = { onSelectBuiltInSound(sound) }) {
-                        Text(text = stringResource(sound.labelRes))
-                    }
-                }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Button(onClick = onPickCustomSound) {
-                    Text(text = stringResource(R.string.choose_media))
-                }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Button(onClick = onOpenSoundPicker) {
+                Text(text = stringResource(R.string.choose_sound))
             }
         }
     }
+}
 }
 
 @Composable
@@ -625,14 +613,15 @@ private fun SliderOptionCard(
     sliderValue: Float,
     onSliderValueChange: (Float) -> Unit
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
         shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             Text(
                 text = title,
@@ -660,6 +649,7 @@ private fun ToggleOptionCard(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
@@ -668,13 +658,13 @@ private fun ToggleOptionCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(22.dp),
+                .padding(dimensions.space2),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(dimensions.space05)
             ) {
                 Text(
                     text = title,
@@ -687,7 +677,7 @@ private fun ToggleOptionCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Spacer(modifier = Modifier.padding(6.dp))
+            Spacer(modifier = Modifier.padding(dimensions.space1))
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange
@@ -701,14 +691,15 @@ private fun NameCard(
     name: String,
     onNameChange: (String) -> Unit
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
         shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             Text(
                 text = stringResource(R.string.alarm_name),
@@ -728,6 +719,7 @@ private fun NameCard(
 
 @Composable
 private fun InfoCard(text: String) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.82f)),
@@ -735,7 +727,7 @@ private fun InfoCard(text: String) {
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(22.dp),
+            modifier = Modifier.padding(dimensions.space2),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             fontWeight = FontWeight.SemiBold

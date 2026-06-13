@@ -19,6 +19,7 @@ import com.kitsuneo.bquick.ui.component.MetricPill
 import com.kitsuneo.bquick.ui.component.NumberAdjusterCard
 import com.kitsuneo.bquick.ui.component.ScreenFrame
 import com.kitsuneo.bquick.ui.component.TimeAdjusterCard
+import com.kitsuneo.bquick.ui.theme.BQuickTheme
 import com.kitsuneo.bquick.ui.util.asClock
 
 @Composable
@@ -31,6 +32,7 @@ fun IntervalSetupScreen(
     onStart: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dimensions = BQuickTheme.dimensions
     val startEnabled = state.workSeconds > 0 || state.restSeconds > 0
 
     ScreenFrame(
@@ -41,7 +43,7 @@ fun IntervalSetupScreen(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
             MetricPill(label = stringResource(R.string.interval_total_time), value = state.totalDurationSeconds.asClock(), modifier = Modifier.weight(1f))
             MetricPill(label = stringResource(R.string.interval_rounds), value = state.rounds.toString(), modifier = Modifier.weight(1f))

@@ -11,7 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -39,18 +43,21 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kitsuneo.bquick.R
+import com.kitsuneo.bquick.ui.theme.BQuickTheme
 import com.kitsuneo.bquick.ui.util.asClock
 import com.kitsuneo.bquick.ui.util.toClockSecondsOrNull
 
 @Composable
 fun ScreenFrame(
-    title: String,
-    subtitle: String,
+    title: String = "",
+    subtitle: String = "",
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     actions: @Composable (() -> Unit)? = null,
+    showHeader: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val dimensions = BQuickTheme.dimensions
     val cardColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
     val background = Brush.verticalGradient(
         colors = listOf(
@@ -63,13 +70,17 @@ fun ScreenFrame(
         modifier = modifier
             .fillMaxSize()
             .background(background)
-            .statusBarsPadding()
+            .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(
+                    WindowInsetsSides.Horizontal + WindowInsetsSides.Vertical
+                )
+            )
     ) {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = dimensions.space2, vertical = dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space3)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -89,82 +100,31 @@ fun ScreenFrame(
                 }
             }
 
-            Card(
-                colors = CardDefaults.cardColors(containerColor = cardColor),
-                shape = RoundedCornerShape(28.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+            if (showHeader) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = cardColor),
+                    shape = RoundedCornerShape(dimensions.space3)
                 ) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column(
+                        modifier = Modifier.padding(dimensions.space3),
+                        verticalArrangement = Arrangement.spacedBy(dimensions.space1)
+                    ) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 
             content()
-        }
-    }
-}
-
-@Composable
-fun AdjusterCard(
-    label: String,
-    value: String,
-    helper: String,
-    onDecrease: () -> Unit,
-    onIncrease: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = helper,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = onDecrease,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(text = "-")
-                }
-                Button(
-                    onClick = onIncrease,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(text = "+")
-                }
-            }
         }
     }
 }
@@ -179,6 +139,7 @@ fun TimeAdjusterCard(
     maxSeconds: Int,
     modifier: Modifier = Modifier
 ) {
+    val dimensions = BQuickTheme.dimensions
     var textValue by rememberSaveable { mutableStateOf(seconds.asClock()) }
 
     LaunchedEffect(seconds) {
@@ -191,11 +152,11 @@ fun TimeAdjusterCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)),
-        shape = RoundedCornerShape(24.dp)
+        shape = RoundedCornerShape(dimensions.space3)
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            modifier = Modifier.padding(dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             Text(
                 text = label,
@@ -226,11 +187,11 @@ fun TimeAdjusterCard(
                 }
             )
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(dimensions.space1)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
                 ) {
                     TimeAdjustmentButton(
                         label = "-10s",
@@ -247,7 +208,7 @@ fun TimeAdjusterCard(
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
                 ) {
                     TimeAdjustmentButton(
                         label = "+1s",
@@ -277,6 +238,7 @@ fun NumberAdjusterCard(
     maxValue: Int,
     modifier: Modifier = Modifier
 ) {
+    val dimensions = BQuickTheme.dimensions
     var textValue by rememberSaveable { mutableStateOf(value.toString()) }
 
     LaunchedEffect(value) {
@@ -289,11 +251,11 @@ fun NumberAdjusterCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)),
-        shape = RoundedCornerShape(24.dp)
+        shape = RoundedCornerShape(dimensions.space3)
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            modifier = Modifier.padding(dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             Text(
                 text = label,
@@ -324,7 +286,7 @@ fun NumberAdjusterCard(
                 }
             )
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(dimensions.space2)
             ) {
                 Button(
                     onClick = { onValueChange((value - 1).coerceAtLeast(minValue)) },
@@ -361,14 +323,15 @@ fun MetricPill(
     value: String,
     modifier: Modifier = Modifier
 ) {
+    val dimensions = BQuickTheme.dimensions
     Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(18.dp)),
+            .clip(RoundedCornerShape(dimensions.space2)),
         color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f)
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier.padding(horizontal = dimensions.space2, vertical = dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space05)
         ) {
             Text(
                 text = label,
@@ -392,14 +355,15 @@ fun StatusCard(
     supportingText: String,
     modifier: Modifier = Modifier
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)),
-        shape = RoundedCornerShape(28.dp)
+        shape = RoundedCornerShape(dimensions.space3)
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(dimensions.space3),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space1),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(

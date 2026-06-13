@@ -2,6 +2,7 @@ package com.kitsuneo.bquick.alarm
 
 import com.kitsuneo.bquick.settings.BuiltInSound
 import com.kitsuneo.bquick.settings.SoundSelection
+import com.kitsuneo.bquick.settings.SoundSelectionCodec
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -38,9 +39,10 @@ object AlarmSerialization {
             minute = item.getInt("minute"),
             repeatDays = repeatDays,
             enabled = item.optBoolean("enabled", true),
-            soundSelection = decodeSoundSelection(
-                item.optString("soundSelection"),
-                item.optString("soundLabel", "Bell")
+            soundSelection = SoundSelectionCodec.decode(
+                encoded = item.optString("soundSelection"),
+                customLabel = item.optString("soundLabel", "Wake Up Anthem"),
+                fallback = SoundSelection.BuiltIn(BuiltInSound.WakeUpAnthem)
             ),
             volumePercent = item.optInt("volumePercent", 100),
             fadeUpEnabled = item.optBoolean("fadeUpEnabled", false),
@@ -49,22 +51,5 @@ object AlarmSerialization {
         )
     }
 
-    private fun encodeSoundSelection(selection: SoundSelection): String = when (selection) {
-        is SoundSelection.BuiltIn -> "builtin:${selection.sound.id}"
-        is SoundSelection.Custom -> "custom:${selection.uri}"
-    }
-
-    private fun decodeSoundSelection(encoded: String?, label: String): SoundSelection {
-        if (encoded.isNullOrBlank()) return SoundSelection.BuiltIn(BuiltInSound.Bell)
-        return when {
-            encoded.startsWith("builtin:") -> {
-                val id = encoded.substringAfter(':')
-                val sound = BuiltInSound.entries.firstOrNull { it.id == id } ?: BuiltInSound.Bell
-                SoundSelection.BuiltIn(sound)
-            }
-
-            encoded.startsWith("custom:") -> SoundSelection.Custom(encoded.substringAfter(':'), label)
-            else -> SoundSelection.BuiltIn(BuiltInSound.Bell)
-        }
-    }
+    private fun encodeSoundSelection(selection: SoundSelection): String = SoundSelectionCodec.encode(selection)
 }

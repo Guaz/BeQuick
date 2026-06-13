@@ -25,6 +25,11 @@ import com.kitsuneo.bquick.feature.randomsound.RandomSoundSetupViewModel
 import com.kitsuneo.bquick.feature.splash.SplashViewModel
 import com.kitsuneo.bquick.navigation.AppRoute
 import com.kitsuneo.bquick.notification.NotificationPermissionEffect
+import com.kitsuneo.bquick.settings.SoundLibraryRepository
+import com.kitsuneo.bquick.settings.SoundSelection
+import com.kitsuneo.bquick.settings.SoundSelectionCodec
+import com.kitsuneo.bquick.settings.SoundSettingsRepository
+import com.kitsuneo.bquick.settings.SoundTarget
 import com.kitsuneo.bquick.timer.TimerForegroundService
 import com.kitsuneo.bquick.ui.screen.AlarmsScreen
 import com.kitsuneo.bquick.ui.screen.AlarmCreateScreen
@@ -34,7 +39,11 @@ import com.kitsuneo.bquick.ui.screen.IntervalSetupScreen
 import com.kitsuneo.bquick.ui.screen.RandomSoundRunningScreen
 import com.kitsuneo.bquick.ui.screen.RandomSoundSetupScreen
 import com.kitsuneo.bquick.ui.screen.SettingsScreen
+import com.kitsuneo.bquick.ui.screen.SoundPickerScreen
 import com.kitsuneo.bquick.ui.screen.SplashScreen
+
+private const val AlarmSoundSelectionResultKey = "alarm_sound_selection_result"
+private const val AlarmSoundSelectionCurrentKey = "alarm_sound_selection_current"
 
 @Composable
 fun BQuickApp(modifier: Modifier = Modifier) {
@@ -103,12 +112,24 @@ fun BQuickApp(modifier: Modifier = Modifier) {
             )
         }
 
-        composable(AppRoute.AlarmCreate.route) {
+        composable(AppRoute.AlarmCreate.route) { backStackEntry ->
             val viewModel: AlarmsViewModel = viewModel()
             val state by viewModel.state.collectAsState()
+            val soundSelectionResult by backStackEntry.savedStateHandle
+                .getStateFlow<String?>(AlarmSoundSelectionResultKey, null)
+                .collectAsState()
 
             LaunchedEffect(Unit) {
                 viewModel.resetDraftForNewAlarm()
+            }
+
+            LaunchedEffect(soundSelectionResult) {
+                val encoded = soundSelectionResult ?: return@LaunchedEffect
+                when (val selection = SoundSelectionCodec.decode(encoded, state.draft.soundSelection)) {
+                    is SoundSelection.BuiltIn -> viewModel.selectBuiltInSound(selection.sound)
+                    is SoundSelection.Custom -> viewModel.selectCustomSound(selection.uri, selection.label)
+                }
+                backStackEntry.savedStateHandle[AlarmSoundSelectionResultKey] = null
             }
 
             AlarmCreateScreen(
@@ -117,8 +138,11 @@ fun BQuickApp(modifier: Modifier = Modifier) {
                 onHourChange = viewModel::updateDraftHour,
                 onMinuteChange = viewModel::updateDraftMinute,
                 onToggleWeekday = viewModel::toggleDraftWeekday,
-                onSelectBuiltInSound = viewModel::selectBuiltInSound,
-                onSelectCustomSound = viewModel::selectCustomSound,
+                onOpenSoundPicker = {
+                    backStackEntry.savedStateHandle[AlarmSoundSelectionCurrentKey] =
+                        SoundSelectionCodec.encode(state.draft.soundSelection)
+                    navController.navigate(AppRoute.AlarmSoundPicker.route)
+                },
                 onVolumeChange = viewModel::updateVolumePercent,
                 onFadeUpChange = viewModel::updateFadeUpEnabled,
                 onVibrateChange = viewModel::updateVibrateEnabled,
@@ -151,9 +175,21 @@ fun BQuickApp(modifier: Modifier = Modifier) {
                 backStackEntry.arguments?.getInt(AppRoute.AlarmEdit.AlarmIdArg) ?: return@composable
             val viewModel: AlarmsViewModel = viewModel()
             val state by viewModel.state.collectAsState()
+            val soundSelectionResult by backStackEntry.savedStateHandle
+                .getStateFlow<String?>(AlarmSoundSelectionResultKey, null)
+                .collectAsState()
 
             LaunchedEffect(alarmId) {
                 viewModel.loadAlarmForEdit(alarmId)
+            }
+
+            LaunchedEffect(soundSelectionResult) {
+                val encoded = soundSelectionResult ?: return@LaunchedEffect
+                when (val selection = SoundSelectionCodec.decode(encoded, state.draft.soundSelection)) {
+                    is SoundSelection.BuiltIn -> viewModel.selectBuiltInSound(selection.sound)
+                    is SoundSelection.Custom -> viewModel.selectCustomSound(selection.uri, selection.label)
+                }
+                backStackEntry.savedStateHandle[AlarmSoundSelectionResultKey] = null
             }
 
             AlarmCreateScreen(
@@ -162,8 +198,11 @@ fun BQuickApp(modifier: Modifier = Modifier) {
                 onHourChange = viewModel::updateDraftHour,
                 onMinuteChange = viewModel::updateDraftMinute,
                 onToggleWeekday = viewModel::toggleDraftWeekday,
-                onSelectBuiltInSound = viewModel::selectBuiltInSound,
-                onSelectCustomSound = viewModel::selectCustomSound,
+                onOpenSoundPicker = {
+                    backStackEntry.savedStateHandle[AlarmSoundSelectionCurrentKey] =
+                        SoundSelectionCodec.encode(state.draft.soundSelection)
+                    navController.navigate(AppRoute.AlarmSoundPicker.route)
+                },
                 onVolumeChange = viewModel::updateVolumePercent,
                 onFadeUpChange = viewModel::updateFadeUpEnabled,
                 onVibrateChange = viewModel::updateVibrateEnabled,
@@ -198,8 +237,83 @@ fun BQuickApp(modifier: Modifier = Modifier) {
                 onBack = { navController.popBackStack() },
                 onAppLanguageChange = viewModel::updateAppLanguage,
                 onAlarmTimeFormatChange = viewModel::updateAlarmTimeFormat,
-                onSelectBuiltInSound = viewModel::selectBuiltInSound,
-                onSelectCustomSound = viewModel::selectCustomSound
+                onHomeOrderChange = viewModel::updateHomeOrder,
+                onOpenSoundPicker = { target ->
+                    navController.navigate(AppRoute.SettingsSoundPicker.createRoute(target.name))
+                }
+            )
+        }
+
+        composable(
+            route = AppRoute.SettingsSoundPicker.route,
+            arguments = listOf(
+                navArgument(AppRoute.SettingsSoundPicker.TargetArg) { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val targetArg = backStackEntry.arguments?.getString(AppRoute.SettingsSoundPicker.TargetArg)
+                ?: return@composable
+            val target = SoundTarget.valueOf(targetArg)
+            val settings by SoundSettingsRepository.settings.collectAsState()
+            val importedSounds by SoundLibraryRepository.customSounds.collectAsState()
+            val currentSelection = when (target) {
+                SoundTarget.ModeSwitch -> settings.modeSwitch
+                SoundTarget.Reaction -> settings.reaction
+            }
+            val titleRes = when (target) {
+                SoundTarget.ModeSwitch -> R.string.settings_mode_switch_sound_title
+                SoundTarget.Reaction -> R.string.settings_reaction_sound_title
+            }
+
+            SoundPickerScreen(
+                title = context.getString(titleRes),
+                currentSelection = currentSelection,
+                importedSounds = importedSounds,
+                onBack = { navController.popBackStack() },
+                onSelectSound = { selection ->
+                    when (selection) {
+                        is SoundSelection.BuiltIn -> {
+                            SoundSettingsRepository.updateBuiltIn(target, selection.sound)
+                        }
+
+                        is SoundSelection.Custom -> {
+                            SoundLibraryRepository.addCustomSound(selection.uri, selection.label)
+                            SoundSettingsRepository.updateCustom(target, selection.uri, selection.label)
+                        }
+                    }
+                    navController.popBackStack()
+                },
+                onImportSound = { uri, label ->
+                    SoundLibraryRepository.addCustomSound(uri, label)
+                }
+            )
+        }
+
+        composable(AppRoute.AlarmSoundPicker.route) {
+            val importedSounds by SoundLibraryRepository.customSounds.collectAsState()
+            val previousEntry = navController.previousBackStackEntry
+            val currentSelection = SoundSelectionCodec.decode(
+                previousEntry?.savedStateHandle?.get<String>(AlarmSoundSelectionCurrentKey),
+                fallback = SoundSelection.BuiltIn(com.kitsuneo.bquick.settings.BuiltInSound.WakeUpAnthem)
+            )
+
+            SoundPickerScreen(
+                title = context.getString(R.string.alarm_sound),
+                currentSelection = currentSelection,
+                importedSounds = importedSounds,
+                onBack = { navController.popBackStack() },
+                onSelectSound = { selection ->
+                    if (selection is SoundSelection.Custom) {
+                        SoundLibraryRepository.addCustomSound(selection.uri, selection.label)
+                    }
+                    previousEntry?.savedStateHandle?.set(
+                        AlarmSoundSelectionResultKey,
+                        SoundSelectionCodec.encode(selection)
+                    )
+                    navController.popBackStack()
+                },
+                onImportSound = { uri, label ->
+                    SoundLibraryRepository.addCustomSound(uri, label)
+                }
             )
         }
 

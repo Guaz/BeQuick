@@ -20,6 +20,7 @@ import com.kitsuneo.bquick.feature.randomsound.RandomSoundRunningUiState
 import com.kitsuneo.bquick.ui.component.MetricPill
 import com.kitsuneo.bquick.ui.component.ScreenFrame
 import com.kitsuneo.bquick.ui.component.StatusCard
+import com.kitsuneo.bquick.ui.theme.BQuickTheme
 import com.kitsuneo.bquick.ui.util.asClock
 
 @Composable
@@ -30,6 +31,7 @@ fun RandomSoundRunningScreen(
     onReset: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dimensions = BQuickTheme.dimensions
     ScreenFrame(
         title = stringResource(R.string.random_running_title),
         subtitle = stringResource(R.string.random_running_subtitle, state.cueCount + 1),
@@ -38,7 +40,7 @@ fun RandomSoundRunningScreen(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
             MetricPill(label = stringResource(R.string.remaining), value = state.remainingSessionSeconds.asClock(), modifier = Modifier.weight(1f))
             MetricPill(label = stringResource(R.string.cues_fired), value = state.cueCount.toString(), modifier = Modifier.weight(1f))
@@ -61,8 +63,8 @@ fun RandomSoundRunningScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(dimensions.space2),
+                verticalArrangement = Arrangement.spacedBy(dimensions.space1)
             ) {
                 Text(
                     text = stringResource(R.string.session_progress),
@@ -77,7 +79,7 @@ fun RandomSoundRunningScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
             Button(
                 onClick = onPauseResume,

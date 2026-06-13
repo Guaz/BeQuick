@@ -22,6 +22,7 @@ import com.kitsuneo.bquick.feature.home.HomeDestination
 import com.kitsuneo.bquick.feature.home.HomeUiState
 import com.kitsuneo.bquick.settings.displayLabel
 import com.kitsuneo.bquick.ui.component.ScreenFrame
+import com.kitsuneo.bquick.ui.theme.BQuickTheme
 
 @Composable
 fun HomeScreen(
@@ -34,40 +35,51 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     ScreenFrame(
-        title = stringResource(R.string.home_title),
-        subtitle = stringResource(R.string.home_subtitle),
+        showHeader = false,
         modifier = modifier
     ) {
-        HomeFeatureCard(
-            eyebrow = stringResource(R.string.home_interval_eyebrow),
-            title = stringResource(R.string.home_interval_title),
-            description = stringResource(R.string.home_interval_description),
-            actionLabel = stringResource(R.string.home_interval_action),
-            onClick = onOpenInterval
-        )
-        HomeFeatureCard(
-            eyebrow = stringResource(R.string.home_random_eyebrow),
-            title = stringResource(R.string.home_random_title),
-            description = stringResource(R.string.home_random_description),
-            actionLabel = stringResource(R.string.home_random_action),
-            onClick = onOpenRandomSound
-        )
-        HomeFeatureCard(
-            eyebrow = stringResource(R.string.home_alarms_eyebrow),
-            title = stringResource(R.string.home_alarms_title),
-            description = stringResource(R.string.home_alarms_description),
-            actionLabel = stringResource(R.string.home_alarms_action),
-            supportingValue = if (state.totalAlarmCount == 0) {
-                stringResource(R.string.home_no_alarms)
-            } else {
-                pluralStringResource(
-                    R.plurals.home_enabled_alarms,
-                    state.enabledAlarmCount,
-                    state.enabledAlarmCount
-                )
-            },
-            onClick = onOpenAlarms
-        )
+        state.homeOrder.forEach { destination ->
+            when (destination) {
+                HomeDestination.Interval -> {
+                    HomeFeatureCard(
+                        eyebrow = stringResource(R.string.home_interval_eyebrow),
+                        title = stringResource(R.string.home_interval_title),
+                        description = stringResource(R.string.home_interval_description),
+                        actionLabel = stringResource(R.string.home_interval_action),
+                        onClick = onOpenInterval
+                    )
+                }
+
+                HomeDestination.RandomSound -> {
+                    HomeFeatureCard(
+                        eyebrow = stringResource(R.string.home_random_eyebrow),
+                        title = stringResource(R.string.home_random_title),
+                        description = stringResource(R.string.home_random_description),
+                        actionLabel = stringResource(R.string.home_random_action),
+                        onClick = onOpenRandomSound
+                    )
+                }
+
+                HomeDestination.Alarms -> {
+                    HomeFeatureCard(
+                        eyebrow = stringResource(R.string.home_alarms_eyebrow),
+                        title = stringResource(R.string.home_alarms_title),
+                        description = stringResource(R.string.home_alarms_description),
+                        actionLabel = stringResource(R.string.home_alarms_action),
+                        supportingValue = if (state.totalAlarmCount == 0) {
+                            stringResource(R.string.home_no_alarms)
+                        } else {
+                            pluralStringResource(
+                                R.plurals.home_enabled_alarms,
+                                state.enabledAlarmCount,
+                                state.enabledAlarmCount
+                            )
+                        },
+                        onClick = onOpenAlarms
+                    )
+                }
+            }
+        }
 
         SettingsEntryCard(
             modeSwitchSoundLabel = state.modeSwitchSound.displayLabel(context),
@@ -88,14 +100,15 @@ private fun HomeFeatureCard(
     onClick: () -> Unit,
     supportingValue: String? = null
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
         shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             Text(
                 text = eyebrow.uppercase(),
@@ -140,14 +153,15 @@ private fun SettingsEntryCard(
     languageLabel: String,
     onOpenSettings: () -> Unit
 ) {
+    val dimensions = BQuickTheme.dimensions
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
         shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(dimensions.space2),
+            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
             Text(
                 text = stringResource(R.string.settings_card_title),

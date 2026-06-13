@@ -7,7 +7,7 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.os.VibrationEffect
@@ -16,7 +16,6 @@ import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.kitsuneo.bquick.MainActivity
 import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.settings.BuiltInSound
 import com.kitsuneo.bquick.settings.SoundSelection
@@ -44,10 +43,12 @@ class AlarmAlertService : Service() {
                 val alarmJson = intent.getStringExtra(AlarmJsonExtra) ?: return START_NOT_STICKY
                 val alarm = AlarmSerialization.fromJson(alarmJson)
                 currentAlarm = alarm
+                val timeText = alarm.displayTime(SoundSettingsRepository.settings.value.alarmTimeFormat)
                 startForeground(
                     NotificationId,
-                    buildNotification(alarm)
+                    buildNotification(alarm, timeText)
                 )
+                launchAlertScreen(alarm, timeText)
                 startAlarm(alarm)
             }
 
@@ -147,9 +148,10 @@ class AlarmAlertService : Service() {
         previousAlarmVolume = null
     }
 
-    private fun dismiss() {
+    private fun dismiss(uiAction: String = ActionAlertDismissed) {
         stopAlarmPlayback()
         NotificationManagerCompat.from(this).cancel(NotificationId)
+        sendBroadcast(Intent(uiAction).setPackage(packageName))
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -160,65 +162,63 @@ class AlarmAlertService : Service() {
                 AlarmScheduler.scheduleSnooze(applicationContext, alarm, afterMinutes = 5)
             }
         }
-        dismiss()
+        dismiss(ActionAlertSnoozed)
     }
 
-    private fun buildNotification(alarm: AlarmEntry) = NotificationCompat.Builder(this, ChannelId)
-        .setSmallIcon(R.mipmap.ic_launcher)
-        .setContentTitle(alarm.displayName(this))
-        .setContentText(
-            getString(
-                R.string.alarm_for_time,
-                alarm.displayTime(SoundSettingsRepository.settings.value.alarmTimeFormat)
+    private fun buildNotification(alarm: AlarmEntry, timeText: String): android.app.Notification {
+        val alertPendingIntent = AlarmAlertActivity.createPendingIntent(this, alarm, timeText)
+        return NotificationCompat.Builder(this, ChannelId)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(alarm.displayName(this))
+            .setContentText(getString(R.string.alarm_for_time, timeText))
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setOngoing(true)
+            .setContentIntent(alertPendingIntent)
+            .setFullScreenIntent(alertPendingIntent, true)
+            .addAction(
+                android.R.drawable.ic_media_pause,
+                getString(R.string.dismiss),
+                PendingIntent.getService(
+                    this,
+                    alarm.id + 91_000,
+                    Intent(this, AlarmAlertService::class.java).apply { action = ActionDismiss },
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
             )
-        )
-        .setPriority(NotificationCompat.PRIORITY_MAX)
-        .setCategory(NotificationCompat.CATEGORY_ALARM)
-        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        .setOngoing(true)
-        .setContentIntent(
-            PendingIntent.getActivity(
-                this,
-                alarm.id + 90_000,
-                Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                },
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        )
-        .addAction(
-            android.R.drawable.ic_media_pause,
-            getString(R.string.dismiss),
-            PendingIntent.getService(
-                this,
-                alarm.id + 91_000,
-                Intent(this, AlarmAlertService::class.java).apply { action = ActionDismiss },
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        )
-        .apply {
-            if (alarm.snoozeEnabled) {
-                addAction(
-                    android.R.drawable.ic_lock_idle_alarm,
-                    getString(R.string.snooze),
-                    PendingIntent.getService(
-                        this@AlarmAlertService,
-                        alarm.id + 92_000,
-                        Intent(this@AlarmAlertService, AlarmAlertService::class.java).apply { action = ActionSnooze },
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            .apply {
+                if (alarm.snoozeEnabled) {
+                    addAction(
+                        android.R.drawable.ic_lock_idle_alarm,
+                        getString(R.string.snooze),
+                        PendingIntent.getService(
+                            this@AlarmAlertService,
+                            alarm.id + 92_000,
+                            Intent(this@AlarmAlertService, AlarmAlertService::class.java).apply { action = ActionSnooze },
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        )
                     )
+                }
+            }
+            .build()
+    }
+
+    private fun launchAlertScreen(alarm: AlarmEntry, timeText: String) {
+        startActivity(
+            AlarmAlertActivity.createIntent(this, alarm, timeText).apply {
+                addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP
                 )
             }
-        }
-        .build()
+        )
+    }
 
     private fun resolveSoundUri(selection: SoundSelection) = when (selection) {
         is SoundSelection.Custom -> android.net.Uri.parse(selection.uri)
-        is SoundSelection.BuiltIn -> when (selection.sound) {
-            BuiltInSound.Pulse -> RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            BuiltInSound.Bell -> RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
-            BuiltInSound.Chime -> RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        }
+        is SoundSelection.BuiltIn -> Uri.parse("android.resource://$packageName/${selection.sound.rawResId}")
     }
 
     companion object {
@@ -227,6 +227,8 @@ class AlarmAlertService : Service() {
         const val ActionStart = "com.kitsuneo.bquick.alarm.START_ALERT"
         const val ActionDismiss = "com.kitsuneo.bquick.alarm.DISMISS_ALERT"
         const val ActionSnooze = "com.kitsuneo.bquick.alarm.SNOOZE_ALERT"
+        const val ActionAlertDismissed = "com.kitsuneo.bquick.alarm.ALERT_DISMISSED"
+        const val ActionAlertSnoozed = "com.kitsuneo.bquick.alarm.ALERT_SNOOZED"
         const val AlarmJsonExtra = "alarmJson"
 
         fun start(context: Context, alarm: AlarmEntry) {
@@ -236,6 +238,14 @@ class AlarmAlertService : Service() {
                 Intent(context, AlarmAlertService::class.java).apply {
                     action = ActionStart
                     putExtra(AlarmJsonExtra, AlarmSerialization.toJson(alarm))
+                }
+            )
+        }
+
+        fun sendAction(context: Context, action: String) {
+            context.startService(
+                Intent(context, AlarmAlertService::class.java).apply {
+                    this.action = action
                 }
             )
         }

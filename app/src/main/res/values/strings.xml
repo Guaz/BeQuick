@@ -7,8 +7,6 @@
     <string name="splash_loading_complete">Loading complete</string>
     <string name="splash_preparing">Preparing session tools</string>
 
-    <string name="home_title">Fast focus tools</string>
-    <string name="home_subtitle">A Compose rewrite of the BFast concept with two training modes.</string>
     <string name="home_interval_eyebrow">Structured timer</string>
     <string name="home_interval_title">Interval</string>
     <string name="home_interval_description">Build work and rest rounds, then run the session with a live countdown.</string>
@@ -30,6 +28,10 @@
     <string name="settings_title">Settings</string>
     <string name="settings_subtitle">Choose language, alarm time format and sounds for timer events.</string>
     <string name="settings_card_title">Settings</string>
+    <string name="settings_home_order_title">Home menu order</string>
+    <string name="settings_home_order_description">Use the arrow buttons to change the order on the home screen.</string>
+    <string name="settings_home_order_move_up">Move item up</string>
+    <string name="settings_home_order_move_down">Move item down</string>
     <string name="settings_mode_switch_sound">Mode switch sound: %1$s</string>
     <string name="settings_reaction_sound">Reaction cue sound: %1$s</string>
     <string name="settings_alarm_time_format">Alarm time format: %1$s</string>
@@ -46,9 +48,19 @@
     <string name="language_polish">Polski</string>
     <string name="alarm_time_format_24h">24H</string>
     <string name="alarm_time_format_12h">12H</string>
-    <string name="sound_pulse">Pulse</string>
-    <string name="sound_bell">Bell</string>
-    <string name="sound_chime">Chime</string>
+    <string name="sound_energized_sunrise">Energized Sunrise</string>
+    <string name="sound_wake_up_anthem">Wake Up Anthem</string>
+    <string name="sound_relaxed_sunrise">Relaxed Sunrise</string>
+    <string name="sound_calm_weekend">Calm Weekend</string>
+    <string name="sound_time_to_shine">Time To Shine</string>
+    <string name="sound_smooth_morning">Smooth Morning</string>
+    <string name="choose_sound">Choose sound</string>
+    <string name="sound_picker_subtitle">Preview bundled sounds or import a file from your phone.</string>
+    <string name="sound_picker_load_from_phone">Load from phone</string>
+    <string name="sound_picker_bundled">Bundled sounds</string>
+    <string name="sound_picker_imported">Imported sounds</string>
+    <string name="sound_picker_empty_custom">No imported sounds yet.</string>
+    <string name="play">Play</string>
 
     <string name="interval_setup_title">Interval setup</string>
     <string name="interval_setup_subtitle">Replicates the BFast interval flow, now as a real Compose + MVVM timer.</string>
@@ -163,6 +175,8 @@
     <string name="alarm_channel_name">Alarm ringing</string>
     <string name="alarm_channel_description">Active ringing alarms</string>
     <string name="alarm_for_time">Alarm for %1$s</string>
+    <string name="alarm_ringing_label">Alarm ringing</string>
+    <string name="close">Close</string>
     <string name="dismiss">Dismiss</string>
     <string name="snooze">Snooze</string>
 </resources>

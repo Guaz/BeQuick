@@ -37,7 +37,7 @@ data class AlarmEntry(
     val minute: Int,
     val repeatDays: Set<AlarmWeekday>,
     val enabled: Boolean,
-    val soundSelection: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.Bell),
+    val soundSelection: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.WakeUpAnthem),
     val volumePercent: Int = 100,
     val fadeUpEnabled: Boolean = false,
     val vibrateEnabled: Boolean = true,

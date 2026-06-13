@@ -3,6 +3,7 @@ package com.kitsuneo.bquick.alarm
 import android.content.Context
 import com.kitsuneo.bquick.settings.BuiltInSound
 import com.kitsuneo.bquick.settings.SoundSelection
+import com.kitsuneo.bquick.settings.SoundSelectionCodec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -149,9 +150,10 @@ object AlarmRepository {
                         minute = item.getInt("minute"),
                         repeatDays = repeatDays,
                         enabled = item.getBoolean("enabled"),
-                        soundSelection = decodeSoundSelection(
+                        soundSelection = SoundSelectionCodec.decode(
                             encoded = item.optString("soundSelection"),
-                            label = item.optString("soundLabel", "Bell")
+                            customLabel = item.optString("soundLabel", "Wake Up Anthem"),
+                            fallback = SoundSelection.BuiltIn(BuiltInSound.WakeUpAnthem)
                         ),
                         volumePercent = item.optInt("volumePercent", 100),
                         fadeUpEnabled = item.optBoolean("fadeUpEnabled", false),
@@ -163,25 +165,5 @@ object AlarmRepository {
         }.sortedWith(compareBy(AlarmEntry::hour, AlarmEntry::minute, AlarmEntry::id))
     }
 
-    private fun encodeSoundSelection(selection: SoundSelection): String = when (selection) {
-        is SoundSelection.BuiltIn -> "builtin:${selection.sound.id}"
-        is SoundSelection.Custom -> "custom:${selection.uri}"
-    }
-
-    private fun decodeSoundSelection(encoded: String?, label: String): SoundSelection {
-        if (encoded.isNullOrBlank()) return SoundSelection.BuiltIn(BuiltInSound.Bell)
-        return when {
-            encoded.startsWith("builtin:") -> {
-                val id = encoded.substringAfter(':')
-                val sound = BuiltInSound.entries.firstOrNull { it.id == id } ?: BuiltInSound.Bell
-                SoundSelection.BuiltIn(sound)
-            }
-
-            encoded.startsWith("custom:") -> {
-                SoundSelection.Custom(encoded.substringAfter(':'), label)
-            }
-
-            else -> SoundSelection.BuiltIn(BuiltInSound.Bell)
-        }
-    }
+    private fun encodeSoundSelection(selection: SoundSelection): String = SoundSelectionCodec.encode(selection)
 }

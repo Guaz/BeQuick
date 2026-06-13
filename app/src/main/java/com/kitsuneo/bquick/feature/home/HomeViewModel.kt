@@ -22,8 +22,9 @@ enum class HomeDestination {
 }
 
 data class HomeUiState(
-    val modeSwitchSound: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.Pulse),
-    val reactionSound: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.Bell),
+    val modeSwitchSound: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.SmoothMorning),
+    val reactionSound: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.TimeToShine),
+    val homeOrder: List<HomeDestination> = HomeDestination.entries,
     val alarmTimeFormat: AlarmTimeFormat = AlarmTimeFormat.Hours24,
     val appLanguage: AppLanguage = AppLanguage.English,
     val enabledAlarmCount: Int = 0,
@@ -43,6 +44,7 @@ class HomeViewModel : ViewModel() {
                 HomeUiState(
                     modeSwitchSound = settings.modeSwitch,
                     reactionSound = settings.reaction,
+                    homeOrder = settings.homeOrder,
                     alarmTimeFormat = settings.alarmTimeFormat,
                     appLanguage = settings.appLanguage,
                     enabledAlarmCount = alarms.count { it.enabled },
@@ -64,6 +66,10 @@ class HomeViewModel : ViewModel() {
 
     fun updateAlarmTimeFormat(format: AlarmTimeFormat) {
         SoundSettingsRepository.updateAlarmTimeFormat(format)
+    }
+
+    fun updateHomeOrder(order: List<HomeDestination>) {
+        SoundSettingsRepository.updateHomeOrder(order)
     }
 
     fun updateAppLanguage(language: AppLanguage) {

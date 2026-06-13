@@ -12,6 +12,7 @@ import com.kitsuneo.bquick.settings.AlarmTimeFormat
 import com.kitsuneo.bquick.settings.BuiltInSound
 import com.kitsuneo.bquick.settings.SoundSelection
 import com.kitsuneo.bquick.settings.SoundSettingsRepository
+import java.util.Calendar
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +25,7 @@ data class AlarmDraftUiState(
     val hour: Int = 7,
     val minute: Int = 0,
     val repeatDays: Set<AlarmWeekday> = emptySet(),
-    val soundSelection: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.Bell),
+    val soundSelection: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.WakeUpAnthem),
     val volumePercent: Int = 100,
     val fadeUpEnabled: Boolean = false,
     val vibrateEnabled: Boolean = true,
@@ -54,7 +55,7 @@ data class AlarmDraftUiState(
 data class AlarmsUiState(
     val alarms: List<AlarmEntry> = emptyList(),
     val alarmTimeFormat: AlarmTimeFormat = AlarmTimeFormat.Hours24,
-    val draft: AlarmDraftUiState = AlarmDraftUiState()
+    val draft: AlarmDraftUiState = newAlarmDraftUiState()
 ) {
     val enabledCount: Int
         get() = alarms.count { it.enabled }
@@ -229,6 +230,13 @@ class AlarmsViewModel : ViewModel() {
     }
 
     private fun resetDraft() {
-        _state.value = _state.value.copy(draft = AlarmDraftUiState())
+        _state.value = _state.value.copy(draft = newAlarmDraftUiState())
     }
+}
+
+private fun newAlarmDraftUiState(now: Calendar = Calendar.getInstance()): AlarmDraftUiState {
+    return AlarmDraftUiState(
+        hour = now.get(Calendar.HOUR_OF_DAY),
+        minute = now.get(Calendar.MINUTE)
+    )
 }

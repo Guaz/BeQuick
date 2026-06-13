@@ -7,8 +7,6 @@
     <string name="splash_loading_complete">Ładowanie zakończone</string>
     <string name="splash_preparing">Przygotowywanie narzędzi sesji</string>
 
-    <string name="home_title">Narzędzia koncentracji</string>
-    <string name="home_subtitle">Compose’owa wersja koncepcji BFast z dwoma trybami treningu.</string>
     <string name="home_interval_eyebrow">Timer strukturalny</string>
     <string name="home_interval_title">Interwały</string>
     <string name="home_interval_description">Ustaw rundy pracy i odpoczynku, a potem uruchom sesję z odliczaniem na żywo.</string>
@@ -32,6 +30,10 @@
     <string name="settings_title">Ustawienia</string>
     <string name="settings_subtitle">Wybierz język, format czasu alarmu i dźwięki dla zdarzeń timera.</string>
     <string name="settings_card_title">Ustawienia</string>
+    <string name="settings_home_order_title">Kolejność menu głównego</string>
+    <string name="settings_home_order_description">Użyj przycisków strzałek, aby zmienić kolejność na ekranie głównym.</string>
+    <string name="settings_home_order_move_up">Przesuń element w górę</string>
+    <string name="settings_home_order_move_down">Przesuń element w dół</string>
     <string name="settings_mode_switch_sound">Dźwięk zmiany trybu: %1$s</string>
     <string name="settings_reaction_sound">Dźwięk sygnału reakcji: %1$s</string>
     <string name="settings_alarm_time_format">Format czasu alarmu: %1$s</string>
@@ -48,9 +50,19 @@
     <string name="language_polish">Polski</string>
     <string name="alarm_time_format_24h">24H</string>
     <string name="alarm_time_format_12h">12H</string>
-    <string name="sound_pulse">Impuls</string>
-    <string name="sound_bell">Dzwonek</string>
-    <string name="sound_chime">Kurant</string>
+    <string name="sound_energized_sunrise">Energetyczny poranek</string>
+    <string name="sound_wake_up_anthem">Pobudka</string>
+    <string name="sound_relaxed_sunrise">Spokojny wschód</string>
+    <string name="sound_calm_weekend">Spokojny weekend</string>
+    <string name="sound_time_to_shine">Czas zabłysnąć</string>
+    <string name="sound_smooth_morning">Łagodny poranek</string>
+    <string name="choose_sound">Wybierz dźwięk</string>
+    <string name="sound_picker_subtitle">Odsłuchaj dołączone dźwięki lub zaimportuj plik z telefonu.</string>
+    <string name="sound_picker_load_from_phone">Wczytaj z telefonu</string>
+    <string name="sound_picker_bundled">Dołączone dźwięki</string>
+    <string name="sound_picker_imported">Zaimportowane dźwięki</string>
+    <string name="sound_picker_empty_custom">Brak zaimportowanych dźwięków.</string>
+    <string name="play">Odtwórz</string>
 
     <string name="interval_setup_title">Ustawienia interwałów</string>
     <string name="interval_setup_subtitle">Odwzorowanie trybu interwałowego BFast, teraz jako prawdziwy timer w Compose + MVVM.</string>
@@ -171,6 +183,8 @@
     <string name="alarm_channel_name">Dzwoniący alarm</string>
     <string name="alarm_channel_description">Aktywnie dzwoniące alarmy</string>
     <string name="alarm_for_time">Alarm na %1$s</string>
+    <string name="alarm_ringing_label">Alarm</string>
+    <string name="close">Zamknij</string>
     <string name="dismiss">Odrzuć</string>
     <string name="snooze">Drzemka</string>
 </resources>

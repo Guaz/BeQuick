@@ -15,10 +15,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.randomsound.RandomSoundSetupUiState
-import com.kitsuneo.bquick.ui.component.AdjusterCard
 import com.kitsuneo.bquick.ui.component.MetricPill
 import com.kitsuneo.bquick.ui.component.ScreenFrame
 import com.kitsuneo.bquick.ui.component.TimeAdjusterCard
+import com.kitsuneo.bquick.ui.theme.BQuickTheme
 import com.kitsuneo.bquick.ui.util.asClock
 
 @Composable
@@ -31,6 +31,7 @@ fun RandomSoundSetupScreen(
     onStart: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dimensions = BQuickTheme.dimensions
     ScreenFrame(
         title = stringResource(R.string.random_setup_title),
         subtitle = stringResource(R.string.random_setup_subtitle),
@@ -39,7 +40,7 @@ fun RandomSoundSetupScreen(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
             MetricPill(label = stringResource(R.string.random_session), value = state.totalSessionSeconds.asClock(), modifier = Modifier.weight(1f))
             MetricPill(

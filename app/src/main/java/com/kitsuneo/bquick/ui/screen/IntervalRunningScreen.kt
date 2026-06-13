@@ -22,6 +22,7 @@ import com.kitsuneo.bquick.timer.IntervalPhase
 import com.kitsuneo.bquick.ui.component.MetricPill
 import com.kitsuneo.bquick.ui.component.ScreenFrame
 import com.kitsuneo.bquick.ui.component.StatusCard
+import com.kitsuneo.bquick.ui.theme.BQuickTheme
 import com.kitsuneo.bquick.ui.util.asClock
 
 @Composable
@@ -32,6 +33,7 @@ fun IntervalRunningScreen(
     onReset: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dimensions = BQuickTheme.dimensions
     val phaseLabel = when (state.currentPhase) {
         IntervalPhase.Work -> stringResource(R.string.phase_work)
         IntervalPhase.Rest -> stringResource(R.string.phase_rest)
@@ -46,7 +48,7 @@ fun IntervalRunningScreen(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
             MetricPill(label = stringResource(R.string.interval_phase), value = phaseLabel, modifier = Modifier.weight(1f))
             MetricPill(label = stringResource(R.string.remaining), value = state.remainingProgramSeconds.asClock(), modifier = Modifier.weight(1f))
@@ -69,8 +71,8 @@ fun IntervalRunningScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(dimensions.space2),
+                verticalArrangement = Arrangement.spacedBy(dimensions.space1)
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth()
@@ -103,7 +105,7 @@ fun IntervalRunningScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
             Button(
                 onClick = onPauseResume,

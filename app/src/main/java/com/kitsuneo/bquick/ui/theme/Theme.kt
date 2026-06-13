@@ -4,7 +4,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 private val DarkColorScheme = darkColorScheme(
     primary = SignalBlue,
@@ -38,14 +43,39 @@ private val LightColorScheme = lightColorScheme(
     tertiary = SoftRose
 )
 
-@Composable
-fun BQuickTheme(
-    darkTheme: Boolean = true,
-    content: @Composable () -> Unit
-) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
-        typography = Typography,
-        content = content
-    )
+data class BQuickDimensions(
+    val space0: Dp = 0.dp,
+    val space025: Dp = 2.dp,
+    val space05: Dp = 4.dp,
+    val space1: Dp = 8.dp,
+    val space2: Dp = 16.dp,
+    val space3: Dp = 24.dp,
+    val space4: Dp = 32.dp,
+)
+
+private val DefaultDimensions = BQuickDimensions()
+
+private val LocalBQuickDimensions = staticCompositionLocalOf { DefaultDimensions }
+
+object BQuickTheme {
+    val dimensions: BQuickDimensions
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalBQuickDimensions.current
+
+    @Composable
+    operator fun invoke(
+        darkTheme: Boolean = true,
+        content: @Composable () -> Unit
+    ) {
+        CompositionLocalProvider(
+            LocalBQuickDimensions provides DefaultDimensions
+        ) {
+            MaterialTheme(
+                colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+                typography = Typography,
+                content = content
+            )
+        }
+    }
 }
