@@ -14,7 +14,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.kitsuneo.bquick.R
@@ -131,28 +130,32 @@ fun RandomSoundRunningScreen(
             )
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
+        BQuickCard(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
         ) {
-            BQuickButton(
-                text = stringResource(if (state.isRunning) R.string.pause else R.string.resume),
-                onClick = onPauseResume,
-                modifier = Modifier.weight(1f),
-                isDisabled = state.isComplete
-            )
-            HoldToConfirmButton(
-                text = resetLabel,
-                onConfirmed = onReset,
-                modifier = Modifier.weight(1f),
-                onHoldStateChange = { isHolding ->
-                    holdOverlayLabel = if (isHolding) resetLabel else null
-                },
-                onHoldProgressChange = { progress ->
-                    holdOverlayLabel = if (progress > 0f) resetLabel else null
-                    holdOverlayProgress = progress
-                }
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
+            ) {
+                BQuickButton(
+                    text = stringResource(if (state.isRunning) R.string.pause else R.string.resume),
+                    onClick = onPauseResume,
+                    modifier = Modifier.weight(1f),
+                    isDisabled = state.isComplete
+                )
+                HoldToConfirmButton(
+                    text = resetLabel,
+                    onConfirmed = onReset,
+                    modifier = Modifier.weight(1f),
+                    onHoldStateChange = { isHolding ->
+                        holdOverlayLabel = if (isHolding) resetLabel else null
+                    },
+                    onHoldProgressChange = { progress ->
+                        holdOverlayLabel = if (progress > 0f) resetLabel else null
+                        holdOverlayProgress = progress
+                    }
+                )
+            }
         }
     }
 }

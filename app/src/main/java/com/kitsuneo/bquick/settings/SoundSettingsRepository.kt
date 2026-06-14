@@ -54,6 +54,30 @@ enum class BuiltInSound(
         "Smooth Morning",
         R.string.sound_smooth_morning,
         R.raw.smooth_morning
+    ),
+    BeforeTheMorningBell(
+        "before_the_morning_bell",
+        "Before The Morning Bell",
+        R.string.sound_before_the_morning_bell,
+        R.raw.before_the_morning_bell
+    ),
+    WakeNow(
+        "wake_now",
+        "Wake Now",
+        R.string.sound_wake_now,
+        R.raw.wake_now
+    ),
+    RiseOfTheSleepy(
+        "rise_of_the_sleepy",
+        "Rise Of The Sleepy",
+        R.string.sound_rise_of_the_sleepy,
+        R.raw.rise_of_the_sleepy
+    ),
+    TrumpetsOfDawn(
+        "trumpets_of_dawn",
+        "Trumpets Of Dawn",
+        R.string.sound_trumpets_of_dawn,
+        R.raw.trumpets_of_dawn
     )
 }
 

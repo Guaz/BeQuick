@@ -326,7 +326,7 @@ class TimerForegroundService : Service() {
             current = when (current.currentPhase) {
                 IntervalPhase.Preparation -> {
                     if (playSounds) {
-                        TimerSignalPlayer.play(SoundSettingsRepository.settings.value.timerSignals.intervalStart)
+                        TimerSignalPlayer.play(this, SoundSettingsRepository.settings.value.timerSignals.intervalStart)
                     }
                     current.copy(
                         currentPhase = IntervalPhase.Work,
@@ -346,7 +346,7 @@ class TimerForegroundService : Service() {
                         )
                     } else {
                         if (playSounds) {
-                            TimerSignalPlayer.play(SoundSettingsRepository.settings.value.timerSignals.intervalRest)
+                            TimerSignalPlayer.play(this, SoundSettingsRepository.settings.value.timerSignals.intervalRest)
                         }
                         current.copy(
                             currentPhase = IntervalPhase.Rest,
@@ -358,7 +358,7 @@ class TimerForegroundService : Service() {
 
                 IntervalPhase.Rest -> {
                     if (playSounds) {
-                        TimerSignalPlayer.play(SoundSettingsRepository.settings.value.timerSignals.intervalWork)
+                        TimerSignalPlayer.play(this, SoundSettingsRepository.settings.value.timerSignals.intervalWork)
                     }
                     current.copy(
                         currentRound = current.currentRound + 1,
@@ -389,7 +389,7 @@ class TimerForegroundService : Service() {
         return when (session.currentPhase) {
             IntervalPhase.Preparation -> {
                 if (playSounds) {
-                    TimerSignalPlayer.play(SoundSettingsRepository.settings.value.timerSignals.intervalStart)
+                    TimerSignalPlayer.play(this, SoundSettingsRepository.settings.value.timerSignals.intervalStart)
                 }
                 normalizeIntervalSession(
                     session.copy(
@@ -412,7 +412,7 @@ class TimerForegroundService : Service() {
                     )
                 } else {
                     if (playSounds) {
-                        TimerSignalPlayer.play(SoundSettingsRepository.settings.value.timerSignals.intervalRest)
+                        TimerSignalPlayer.play(this, SoundSettingsRepository.settings.value.timerSignals.intervalRest)
                     }
                     normalizeIntervalSession(
                         session.copy(
@@ -427,7 +427,7 @@ class TimerForegroundService : Service() {
 
             IntervalPhase.Rest -> {
                 if (playSounds) {
-                    TimerSignalPlayer.play(SoundSettingsRepository.settings.value.timerSignals.intervalWork)
+                    TimerSignalPlayer.play(this, SoundSettingsRepository.settings.value.timerSignals.intervalWork)
                 }
                 normalizeIntervalSession(
                     session.copy(
@@ -452,7 +452,7 @@ class TimerForegroundService : Service() {
             val remainingPreparationSeconds = session.remainingPreparationSeconds - 1
             if (remainingPreparationSeconds <= 0) {
                 if (playSounds) {
-                    TimerSignalPlayer.play(SoundSettingsRepository.settings.value.timerSignals.randomStart)
+                    TimerSignalPlayer.play(this, SoundSettingsRepository.settings.value.timerSignals.randomStart)
                 }
                 return session.copy(remainingPreparationSeconds = 0)
             }
@@ -472,7 +472,7 @@ class TimerForegroundService : Service() {
         val nextCueInSeconds = session.nextCueInSeconds - 1
         return if (nextCueInSeconds <= 0) {
             if (playSounds) {
-                TimerSignalPlayer.play(SoundSettingsRepository.settings.value.timerSignals.randomBeep)
+                TimerSignalPlayer.play(this, SoundSettingsRepository.settings.value.timerSignals.randomBeep)
             }
             session.copy(
                 remainingSessionSeconds = remainingSessionSeconds,
@@ -518,12 +518,12 @@ class TimerForegroundService : Service() {
             is ActiveTimerSession.Countdown -> Unit
             is ActiveTimerSession.Interval -> {
                 if (session.preparationSeconds == 0 && session.currentPhase == IntervalPhase.Work && !session.isComplete) {
-                    TimerSignalPlayer.play(timerSignals.intervalStart)
+                    TimerSignalPlayer.play(this, timerSignals.intervalStart)
                 }
             }
             is ActiveTimerSession.Reaction -> {
                 if (session.remainingPreparationSeconds == 0 && !session.isComplete) {
-                    TimerSignalPlayer.play(timerSignals.randomStart)
+                    TimerSignalPlayer.play(this, timerSignals.randomStart)
                 }
             }
             is ActiveTimerSession.Stopwatch -> Unit
@@ -544,7 +544,7 @@ class TimerForegroundService : Service() {
                     IntervalCueMode.Middle -> remainingPhaseSeconds == session.phaseDurationSeconds / 2
                 }
             }?.let { cue ->
-                TimerSignalPlayer.play(cue.signal)
+                TimerSignalPlayer.play(this, cue.signal)
             }
     }
 

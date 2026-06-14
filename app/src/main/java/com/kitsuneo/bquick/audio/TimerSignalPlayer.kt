@@ -1,6 +1,8 @@
 package com.kitsuneo.bquick.audio
 
+import android.content.Context
 import android.media.AudioManager
+import android.media.MediaPlayer
 import android.media.ToneGenerator
 import com.kitsuneo.bquick.settings.TimerSignal
 import kotlinx.coroutines.CoroutineScope
@@ -14,10 +16,26 @@ import kotlinx.coroutines.launch
 object TimerSignalPlayer {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var toneGenerator: ToneGenerator? = null
+    private var mediaPlayer: MediaPlayer? = null
     private var playbackJob: Job? = null
 
-    fun play(signal: TimerSignal) {
+    fun play(context: Context, signal: TimerSignal) {
         playbackJob?.cancel()
+        mediaPlayer?.release()
+        mediaPlayer = null
+        val rawResId = signal.rawResId
+        if (rawResId != null) {
+            mediaPlayer = MediaPlayer.create(context.applicationContext, rawResId)?.apply {
+                setOnCompletionListener {
+                    it.release()
+                    if (mediaPlayer === it) {
+                        mediaPlayer = null
+                    }
+                }
+                start()
+            }
+            return
+        }
         val generator = toneGenerator ?: ToneGenerator(AudioManager.STREAM_MUSIC, 90).also {
             toneGenerator = it
         }
@@ -32,6 +50,8 @@ object TimerSignalPlayer {
     fun release() {
         playbackJob?.cancel()
         playbackJob = null
+        mediaPlayer?.release()
+        mediaPlayer = null
         toneGenerator?.release()
         toneGenerator = null
     }

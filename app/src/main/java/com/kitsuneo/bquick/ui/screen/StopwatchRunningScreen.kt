@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.stopwatch.StopwatchRunningUiState
 import com.kitsuneo.bquick.ui.component.AnimatedSessionBackground
+import com.kitsuneo.bquick.ui.component.BQuickCard
 import com.kitsuneo.bquick.ui.component.BQuickButton
 import com.kitsuneo.bquick.ui.component.HoldProgressOverlay
 import com.kitsuneo.bquick.ui.component.HoldToConfirmButton
@@ -133,34 +134,38 @@ fun StopwatchRunningScreen(
             )
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
+        BQuickCard(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
         ) {
-            BQuickButton(
-                text = stringResource(
-                    when {
-                        !state.hasActiveSession -> R.string.start
-                        state.isRunning -> R.string.pause
-                        else -> R.string.resume
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
+            ) {
+                BQuickButton(
+                    text = stringResource(
+                        when {
+                            !state.hasActiveSession -> R.string.start
+                            state.isRunning -> R.string.pause
+                            else -> R.string.resume
+                        }
+                    ),
+                    onClick = onPrimaryAction,
+                    modifier = Modifier.weight(1f)
+                )
+                HoldToConfirmButton(
+                    text = resetLabel,
+                    onConfirmed = onReset,
+                    modifier = Modifier.weight(1f),
+                    enabled = state.hasActiveSession || displayedElapsedMillis > 0L,
+                    onHoldStateChange = { isHolding ->
+                        holdOverlayLabel = if (isHolding) resetLabel else null
+                    },
+                    onHoldProgressChange = { progress ->
+                        holdOverlayLabel = if (progress > 0f) resetLabel else null
+                        holdOverlayProgress = progress
                     }
-                ),
-                onClick = onPrimaryAction,
-                modifier = Modifier.weight(1f)
-            )
-            HoldToConfirmButton(
-                text = resetLabel,
-                onConfirmed = onReset,
-                modifier = Modifier.weight(1f),
-                enabled = state.hasActiveSession || displayedElapsedMillis > 0L,
-                onHoldStateChange = { isHolding ->
-                    holdOverlayLabel = if (isHolding) resetLabel else null
-                },
-                onHoldProgressChange = { progress ->
-                    holdOverlayLabel = if (progress > 0f) resetLabel else null
-                    holdOverlayProgress = progress
-                }
-            )
+                )
+            }
         }
     }
 }

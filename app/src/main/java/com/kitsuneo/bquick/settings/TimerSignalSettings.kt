@@ -2,6 +2,7 @@ package com.kitsuneo.bquick.settings
 
 import android.content.Context
 import android.media.ToneGenerator
+import androidx.annotation.RawRes
 import androidx.annotation.StringRes
 import com.kitsuneo.bquick.R
 
@@ -14,7 +15,8 @@ data class TimerToneStep(
 enum class TimerSignal(
     val id: String,
     @StringRes val labelRes: Int,
-    val pattern: List<TimerToneStep>
+    val pattern: List<TimerToneStep> = emptyList(),
+    @RawRes val rawResId: Int? = null
 ) {
     ShortBeep(
         id = "short_beep",
@@ -55,6 +57,21 @@ enum class TimerSignal(
             TimerToneStep(ToneGenerator.TONE_PROP_PROMPT, 170, 70),
             TimerToneStep(ToneGenerator.TONE_PROP_ACK, 200)
         )
+    ),
+    Beep1(
+        id = "beep_1",
+        labelRes = R.string.timer_signal_beep_1,
+        rawResId = R.raw.beep_1
+    ),
+    Beep2(
+        id = "beep_2",
+        labelRes = R.string.timer_signal_beep_2,
+        rawResId = R.raw.beep_2
+    ),
+    Beep3(
+        id = "beep_3",
+        labelRes = R.string.timer_signal_beep_3,
+        rawResId = R.raw.beep_3
     );
 
     companion object {

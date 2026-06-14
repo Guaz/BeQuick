@@ -52,7 +52,7 @@ fun TimerSignalPickerScreen(
                 TimerSignalRow(
                     label = signal.timerLabel(context),
                     isSelected = signal == currentSignal,
-                    onPlay = { TimerSignalPlayer.play(signal) },
+                    onPlay = { TimerSignalPlayer.play(context, signal) },
                     onSelect = { onSelectSignal(signal) }
                 )
             }

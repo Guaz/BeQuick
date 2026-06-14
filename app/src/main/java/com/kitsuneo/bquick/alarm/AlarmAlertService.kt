@@ -77,6 +77,12 @@ class AlarmAlertService : Service() {
             )
             setDataSource(applicationContext, resolveSoundUri(alarm.soundSelection))
             isLooping = true
+            setOnCompletionListener { completedPlayer ->
+                if (currentAlarm != null) {
+                    completedPlayer.seekTo(0)
+                    completedPlayer.start()
+                }
+            }
             prepare()
             start()
         }
@@ -153,6 +159,7 @@ class AlarmAlertService : Service() {
     }
 
     private fun dismiss(uiAction: String = ActionAlertDismissed) {
+        currentAlarm = null
         stopAlarmPlayback()
         NotificationManagerCompat.from(this).cancel(NotificationId)
         sendBroadcast(Intent(uiAction).setPackage(packageName))
