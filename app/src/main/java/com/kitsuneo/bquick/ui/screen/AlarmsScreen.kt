@@ -22,10 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -33,7 +29,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -52,6 +47,9 @@ import com.kitsuneo.bquick.alarm.format
 import com.kitsuneo.bquick.feature.alarm.AlarmDraftUiState
 import com.kitsuneo.bquick.feature.alarm.AlarmsUiState
 import com.kitsuneo.bquick.settings.displayLabel
+import com.kitsuneo.bquick.ui.component.BQuickCard
+import com.kitsuneo.bquick.ui.component.BQuickButton
+import com.kitsuneo.bquick.ui.component.BQuickButtonStyle
 import com.kitsuneo.bquick.ui.theme.BQuickTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -92,12 +90,11 @@ fun AlarmsScreen(
                     .navigationBarsPadding()
                     .padding(dimensions.space2)
             ) {
-                Button(
+                BQuickButton(
+                    text = stringResource(R.string.create_new_alarm),
                     onClick = onOpenCreateAlarm,
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = stringResource(R.string.create_new_alarm))
-                }
+                )
             }
         }
     ) { innerPadding ->
@@ -115,9 +112,10 @@ fun AlarmsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(onClick = onBack) {
-                        Text(text = stringResource(R.string.back))
-                    }
+                    BQuickButton(
+                        text = stringResource(R.string.back),
+                        onClick = onBack
+                    )
                     Spacer(modifier = Modifier.height(1.dp))
                 }
             }
@@ -133,14 +131,12 @@ fun AlarmsScreen(
             }
             if (state.alarms.isEmpty()) {
                 item {
-                    Card(
+                    BQuickCard(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-                        shape = MaterialTheme.shapes.extraLarge
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
                     ) {
                         Text(
                             text = stringResource(R.string.alarms_empty),
-                            modifier = Modifier.padding(dimensions.space2),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -205,26 +201,22 @@ fun AlarmCreateScreen(
                     .navigationBarsPadding()
                     .padding(dimensions.space2)
             ) {
-                Button(
+                BQuickButton(
+                    text = stringResource(
+                        if (state.editingAlarmId == null) R.string.save_alarm else R.string.update_alarm
+                    ),
                     onClick = onSaveAlarm,
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = stringResource(
-                            if (state.editingAlarmId == null) R.string.save_alarm else R.string.update_alarm
-                        )
-                    )
-                }
+                )
                 if (state.editingAlarmId != null && onDeleteAlarm != null) {
-                    TextButton(
+                    BQuickButton(
+                        text = stringResource(R.string.remove_alarm),
                         onClick = onDeleteAlarm,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = stringResource(R.string.remove_alarm),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
+                        modifier = Modifier.fillMaxWidth(),
+                        style = BQuickButtonStyle.Outlined,
+                        contentColor = MaterialTheme.colorScheme.error,
+                        borderColor = MaterialTheme.colorScheme.error.copy(alpha = 0.45f)
+                    )
                 }
             }
         }
@@ -243,9 +235,10 @@ fun AlarmCreateScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(onClick = onBack) {
-                        Text(text = stringResource(R.string.back))
-                    }
+                    BQuickButton(
+                        text = stringResource(R.string.back),
+                        onClick = onBack
+                    )
                     Spacer(modifier = Modifier.height(1.dp))
                 }
             }
@@ -333,26 +326,22 @@ private fun HeaderCard(
     subtitle: String
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)),
-        shape = RoundedCornerShape(dimensions.space3)
+    BQuickCard(
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+        contentPadding = PaddingValues(dimensions.space3),
+        verticalArrangement = Arrangement.spacedBy(dimensions.space1)
     ) {
-        Column(
-            modifier = Modifier.padding(dimensions.space3),
-            verticalArrangement = Arrangement.spacedBy(dimensions.space1)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -365,17 +354,14 @@ private fun AlarmListRow(
     onToggle: () -> Unit
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onOpenEdit),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-        shape = MaterialTheme.shapes.extraLarge
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(dimensions.space2),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -414,39 +400,34 @@ private fun TimePickerCard(
     onMinuteChange: (Int) -> Unit
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-        shape = MaterialTheme.shapes.extraLarge
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        verticalArrangement = Arrangement.spacedBy(dimensions.space2)
     ) {
-        Column(
-            modifier = Modifier.padding(dimensions.space2),
-            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
+        Text(
+            text = stringResource(R.string.time),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(dimensions.space2)
         ) {
-            Text(
-                text = stringResource(R.string.time),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+            WheelPicker(
+                label = stringResource(R.string.hour),
+                range = 0..23,
+                selected = hour,
+                onSelectedChange = onHourChange,
+                modifier = Modifier.weight(1f)
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(dimensions.space2)
-            ) {
-                WheelPicker(
-                    label = stringResource(R.string.hour),
-                    range = 0..23,
-                    selected = hour,
-                    onSelectedChange = onHourChange,
-                    modifier = Modifier.weight(1f)
-                )
-                WheelPicker(
-                    label = stringResource(R.string.minute),
-                    range = 0..59,
-                    selected = minute,
-                    onSelectedChange = onMinuteChange,
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            WheelPicker(
+                label = stringResource(R.string.minute),
+                range = 0..59,
+                selected = minute,
+                onSelectedChange = onMinuteChange,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
@@ -490,9 +471,9 @@ private fun WheelPicker(
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
-        Card(
-            shape = RoundedCornerShape(dimensions.space3),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        BQuickCard(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentPadding = PaddingValues(0.dp)
         ) {
             LazyColumn(
                 state = listState,
@@ -535,35 +516,30 @@ private fun RepeatDaysCard(
     onToggleDay: (AlarmWeekday) -> Unit
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-        shape = MaterialTheme.shapes.extraLarge
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        verticalArrangement = Arrangement.spacedBy(dimensions.space2)
     ) {
-        Column(
-            modifier = Modifier.padding(dimensions.space2),
-            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
+        Text(
+            text = stringResource(R.string.repeat),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = stringResource(R.string.repeat_description),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
-            Text(
-                text = stringResource(R.string.repeat),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = stringResource(R.string.repeat_description),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
-            ) {
-                items(AlarmWeekday.entries, key = { it.name }) { day ->
-                    FilterChip(
-                        selected = day in selectedDays,
-                        onClick = { onToggleDay(day) },
-                        label = { Text(day.shortLabel(LocalContext.current)) }
-                    )
-                }
+            items(AlarmWeekday.entries, key = { it.name }) { day ->
+                FilterChip(
+                    selected = day in selectedDays,
+                    onClick = { onToggleDay(day) },
+                    label = { Text(day.shortLabel(LocalContext.current)) }
+                )
             }
         }
     }
@@ -575,35 +551,31 @@ private fun SoundPickerCard(
     onOpenSoundPicker: () -> Unit
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-        shape = MaterialTheme.shapes.extraLarge
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        verticalArrangement = Arrangement.spacedBy(dimensions.space2)
     ) {
-        Column(
-            modifier = Modifier.padding(dimensions.space2),
-            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
-        ) {
-            Text(
-                text = stringResource(R.string.alarm_sound),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = stringResource(R.string.current_value, currentLabel),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        Text(
+            text = stringResource(R.string.alarm_sound),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = stringResource(R.string.current_value, currentLabel),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(onClick = onOpenSoundPicker) {
-                Text(text = stringResource(R.string.choose_sound))
-            }
+            BQuickButton(
+                text = stringResource(R.string.choose_sound),
+                onClick = onOpenSoundPicker
+            )
         }
     }
-}
 }
 
 @Composable
@@ -614,31 +586,26 @@ private fun SliderOptionCard(
     onSliderValueChange: (Float) -> Unit
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-        shape = MaterialTheme.shapes.extraLarge
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        verticalArrangement = Arrangement.spacedBy(dimensions.space2)
     ) {
-        Column(
-            modifier = Modifier.padding(dimensions.space2),
-            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = valueLabel,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Slider(
-                value = sliderValue,
-                onValueChange = onSliderValueChange,
-                valueRange = 0f..1f
-            )
-        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = valueLabel,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Slider(
+            value = sliderValue,
+            onValueChange = onSliderValueChange,
+            valueRange = 0f..1f
+        )
     }
 }
 
@@ -650,15 +617,12 @@ private fun ToggleOptionCard(
     onCheckedChange: (Boolean) -> Unit
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-        shape = MaterialTheme.shapes.extraLarge
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(dimensions.space2),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -692,42 +656,34 @@ private fun NameCard(
     onNameChange: (String) -> Unit
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-        shape = MaterialTheme.shapes.extraLarge
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        verticalArrangement = Arrangement.spacedBy(dimensions.space2)
     ) {
-        Column(
-            modifier = Modifier.padding(dimensions.space2),
-            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
-        ) {
-            Text(
-                text = stringResource(R.string.alarm_name),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            OutlinedTextField(
-                value = name,
-                onValueChange = onNameChange,
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                placeholder = { Text(stringResource(R.string.alarm_name_placeholder)) }
-            )
-        }
+        Text(
+            text = stringResource(R.string.alarm_name),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        OutlinedTextField(
+            value = name,
+            onValueChange = onNameChange,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            placeholder = { Text(stringResource(R.string.alarm_name_placeholder)) }
+        )
     }
 }
 
 @Composable
 private fun InfoCard(text: String) {
-    val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.82f)),
-        shape = MaterialTheme.shapes.extraLarge
+        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.82f)
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(dimensions.space2),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             fontWeight = FontWeight.SemiBold

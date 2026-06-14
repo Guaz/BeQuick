@@ -7,17 +7,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 data class IntervalSetupUiState(
+    val preparationSeconds: Int = 10,
     val workSeconds: Int = 40,
     val restSeconds: Int = 20,
     val rounds: Int = 8
 ) {
     val totalDurationSeconds: Int
-        get() = (workSeconds * rounds) + (restSeconds * (rounds - 1))
+        get() = preparationSeconds + (workSeconds * rounds) + (restSeconds * (rounds - 1))
 }
 
 class IntervalSetupViewModel : ViewModel() {
     private val _state = MutableStateFlow(IntervalSetupUiState())
     val state: StateFlow<IntervalSetupUiState> = _state.asStateFlow()
+
+    fun updatePreparationSeconds(value: Int) {
+        _state.update { it.copy(preparationSeconds = value.coerceIn(0, 120)) }
+    }
 
     fun updateWorkSeconds(value: Int) {
         _state.update { it.copy(workSeconds = value.coerceIn(0, 180)) }

@@ -13,11 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Locale
 
-enum class SoundTarget {
-    ModeSwitch,
-    Reaction
-}
-
 enum class BuiltInSound(
     val id: String,
     val defaultLabel: String,
@@ -73,8 +68,9 @@ sealed interface SoundSelection {
 }
 
 data class SoundSettings(
-    val modeSwitch: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.SmoothMorning),
-    val reaction: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.TimeToShine),
+    val timerSignals: TimerSignalSettings = TimerSignalSettings(),
+    val timerAlarmSound: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.WakeUpAnthem),
+    val defaultAlarmSound: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.WakeUpAnthem),
     val homeOrder: List<HomeDestination> = HomeDestination.entries,
     val alarmTimeFormat: AlarmTimeFormat = AlarmTimeFormat.Hours24,
     val appLanguage: AppLanguage = AppLanguage.English
@@ -165,10 +161,15 @@ object SoundLibraryRepository {
 
 object SoundSettingsRepository {
     private const val PrefName = "sound_settings"
-    private const val ModeSwitchKey = "mode_switch"
-    private const val ModeSwitchLabelKey = "mode_switch_label"
-    private const val ReactionKey = "reaction"
-    private const val ReactionLabelKey = "reaction_label"
+    private const val IntervalStartSignalKey = "interval_start_signal"
+    private const val IntervalWorkSignalKey = "interval_work_signal"
+    private const val IntervalRestSignalKey = "interval_rest_signal"
+    private const val RandomStartSignalKey = "random_start_signal"
+    private const val RandomBeepSignalKey = "random_beep_signal"
+    private const val TimerAlarmSoundKey = "timer_alarm_sound"
+    private const val TimerAlarmSoundLabelKey = "timer_alarm_sound_label"
+    private const val DefaultAlarmSoundKey = "default_alarm_sound"
+    private const val DefaultAlarmSoundLabelKey = "default_alarm_sound_label"
     private const val HomeOrderKey = "home_order"
     private const val AlarmTimeFormatKey = "alarm_time_format"
     private const val AppLanguageKey = "app_language"
@@ -186,22 +187,41 @@ object SoundSettingsRepository {
         applyAppLanguage(context, resolveLanguage(context))
     }
 
-    fun updateBuiltIn(target: SoundTarget, sound: BuiltInSound) {
-        val selection = SoundSelection.BuiltIn(sound)
-        val updated = when (target) {
-            SoundTarget.ModeSwitch -> _settings.value.copy(modeSwitch = selection)
-            SoundTarget.Reaction -> _settings.value.copy(reaction = selection)
+    fun updateTimerSignal(target: TimerSignalPickerTarget, signal: TimerSignal) {
+        val timerSignals = _settings.value.timerSignals
+        val updatedSignals = when (target) {
+            TimerSignalPickerTarget.IntervalStart -> timerSignals.copy(intervalStart = signal)
+            TimerSignalPickerTarget.IntervalWork -> timerSignals.copy(intervalWork = signal)
+            TimerSignalPickerTarget.IntervalRest -> timerSignals.copy(intervalRest = signal)
+            TimerSignalPickerTarget.RandomStart -> timerSignals.copy(randomStart = signal)
+            TimerSignalPickerTarget.RandomBeep -> timerSignals.copy(randomBeep = signal)
+            is TimerSignalPickerTarget.IntervalExtraCueTarget -> timerSignals.copy(
+                intervalExtraCues = timerSignals.intervalExtraCues.toMutableList().apply {
+                    this[target.index] = this[target.index].copy(signal = signal)
+                }
+            ).normalized()
         }
-        persist(updated)
+        persist(_settings.value.copy(timerSignals = updatedSignals))
     }
 
-    fun updateCustom(target: SoundTarget, uri: String, label: String) {
-        val selection = SoundSelection.Custom(uri = uri, label = label)
-        val updated = when (target) {
-            SoundTarget.ModeSwitch -> _settings.value.copy(modeSwitch = selection)
-            SoundTarget.Reaction -> _settings.value.copy(reaction = selection)
-        }
-        persist(updated)
+    fun updateIntervalExtraCueEnabled(index: Int, enabled: Boolean) {
+        updateIntervalExtraCue(index) { it.copy(enabled = enabled) }
+    }
+
+    fun updateIntervalExtraCueMode(index: Int, mode: IntervalCueMode) {
+        updateIntervalExtraCue(index) { it.copy(mode = mode) }
+    }
+
+    fun updateIntervalExtraCueSeconds(index: Int, secondsBeforeEnd: Int) {
+        updateIntervalExtraCue(index) { it.copy(secondsBeforeEnd = secondsBeforeEnd.coerceIn(1, 3599)) }
+    }
+
+    fun updateDefaultAlarmSound(selection: SoundSelection) {
+        persist(_settings.value.copy(defaultAlarmSound = selection))
+    }
+
+    fun updateTimerAlarmSound(selection: SoundSelection) {
+        persist(_settings.value.copy(timerAlarmSound = selection))
     }
 
     fun updateAlarmTimeFormat(format: AlarmTimeFormat) {
@@ -224,15 +244,45 @@ object SoundSettingsRepository {
         if (!::appContext.isInitialized) return SoundSettings()
         val prefs = appContext.getSharedPreferences(PrefName, Context.MODE_PRIVATE)
         return SoundSettings(
-            modeSwitch = SoundSelectionCodec.decode(
-                prefs.getString(ModeSwitchKey, null),
-                fallback = SoundSelection.BuiltIn(BuiltInSound.SmoothMorning),
-                customLabel = prefs.getString(ModeSwitchLabelKey, null)
+            timerSignals = TimerSignalSettings(
+                intervalStart = TimerSignal.fromId(prefs.getString(IntervalStartSignalKey, null))
+                    ?: TimerSignalSettings().intervalStart,
+                intervalWork = TimerSignal.fromId(prefs.getString(IntervalWorkSignalKey, null))
+                    ?: TimerSignalSettings().intervalWork,
+                intervalRest = TimerSignal.fromId(prefs.getString(IntervalRestSignalKey, null))
+                    ?: TimerSignalSettings().intervalRest,
+                randomStart = TimerSignal.fromId(prefs.getString(RandomStartSignalKey, null))
+                    ?: TimerSignalSettings().randomStart,
+                randomBeep = TimerSignal.fromId(prefs.getString(RandomBeepSignalKey, null))
+                    ?: TimerSignalSettings().randomBeep,
+                intervalExtraCues = buildList {
+                    repeat(TimerSignalSettings.MaxIntervalExtraCues) { index ->
+                        add(
+                            IntervalExtraCue(
+                                enabled = prefs.getBoolean("interval_extra_${index}_enabled", false),
+                                mode = prefs.getString(
+                                    "interval_extra_${index}_mode",
+                                    IntervalCueMode.SecondsBeforeEnd.name
+                                )?.let { saved ->
+                                    IntervalCueMode.entries.firstOrNull { it.name == saved }
+                                } ?: IntervalCueMode.SecondsBeforeEnd,
+                                secondsBeforeEnd = prefs.getInt("interval_extra_${index}_seconds", 3),
+                                signal = TimerSignal.fromId(prefs.getString("interval_extra_${index}_signal", null))
+                                    ?: IntervalExtraCue().signal
+                            )
+                        )
+                    }
+                }
+            ).normalized(),
+            timerAlarmSound = SoundSelectionCodec.decode(
+                prefs.getString(TimerAlarmSoundKey, null),
+                fallback = SoundSelection.BuiltIn(BuiltInSound.WakeUpAnthem),
+                customLabel = prefs.getString(TimerAlarmSoundLabelKey, null)
             ),
-            reaction = SoundSelectionCodec.decode(
-                prefs.getString(ReactionKey, null),
-                fallback = SoundSelection.BuiltIn(BuiltInSound.TimeToShine),
-                customLabel = prefs.getString(ReactionLabelKey, null)
+            defaultAlarmSound = SoundSelectionCodec.decode(
+                prefs.getString(DefaultAlarmSoundKey, null),
+                fallback = SoundSelection.BuiltIn(BuiltInSound.WakeUpAnthem),
+                customLabel = prefs.getString(DefaultAlarmSoundLabelKey, null)
             ),
             homeOrder = decodeHomeOrder(prefs.getString(HomeOrderKey, null)),
             alarmTimeFormat = AlarmTimeFormat.entries.firstOrNull {
@@ -244,19 +294,42 @@ object SoundSettingsRepository {
 
     private fun persist(settings: SoundSettings) {
         if (!::appContext.isInitialized) return
-        _settings.value = settings
+        val normalized = settings.copy(timerSignals = settings.timerSignals.normalized())
+        _settings.value = normalized
         appContext.getSharedPreferences(PrefName, Context.MODE_PRIVATE).edit {
-            putString(ModeSwitchKey, SoundSelectionCodec.encode(settings.modeSwitch))
-            putString(ModeSwitchLabelKey, settings.modeSwitch.label)
-            putString(ReactionKey, SoundSelectionCodec.encode(settings.reaction))
-            putString(ReactionLabelKey, settings.reaction.label)
+            putString(IntervalStartSignalKey, normalized.timerSignals.intervalStart.id)
+            putString(IntervalWorkSignalKey, normalized.timerSignals.intervalWork.id)
+            putString(IntervalRestSignalKey, normalized.timerSignals.intervalRest.id)
+            putString(RandomStartSignalKey, normalized.timerSignals.randomStart.id)
+            putString(RandomBeepSignalKey, normalized.timerSignals.randomBeep.id)
+            putString(TimerAlarmSoundKey, SoundSelectionCodec.encode(normalized.timerAlarmSound))
+            putString(TimerAlarmSoundLabelKey, normalized.timerAlarmSound.label)
+            putString(DefaultAlarmSoundKey, SoundSelectionCodec.encode(normalized.defaultAlarmSound))
+            putString(DefaultAlarmSoundLabelKey, normalized.defaultAlarmSound.label)
+            normalized.timerSignals.intervalExtraCues.forEachIndexed { index, cue ->
+                putBoolean("interval_extra_${index}_enabled", cue.enabled)
+                putString("interval_extra_${index}_mode", cue.mode.name)
+                putInt("interval_extra_${index}_seconds", cue.secondsBeforeEnd)
+                putString("interval_extra_${index}_signal", cue.signal.id)
+            }
             putString(
                 HomeOrderKey,
-                normalizeHomeOrder(settings.homeOrder).joinToString(separator = ",") { it.name }
+                normalizeHomeOrder(normalized.homeOrder).joinToString(separator = ",") { it.name }
             )
-            putString(AlarmTimeFormatKey, settings.alarmTimeFormat.name)
-            putString(AppLanguageKey, settings.appLanguage.languageTag)
+            putString(AlarmTimeFormatKey, normalized.alarmTimeFormat.name)
+            putString(AppLanguageKey, normalized.appLanguage.languageTag)
         }
+    }
+
+    private fun updateIntervalExtraCue(index: Int, transform: (IntervalExtraCue) -> IntervalExtraCue) {
+        if (index !in 0 until TimerSignalSettings.MaxIntervalExtraCues) return
+        val cues = _settings.value.timerSignals.intervalExtraCues.toMutableList()
+        cues[index] = transform(cues[index])
+        persist(
+            _settings.value.copy(
+                timerSignals = _settings.value.timerSignals.copy(intervalExtraCues = cues).normalized()
+            )
+        )
     }
 
     private fun decodeHomeOrder(encoded: String?): List<HomeDestination> {

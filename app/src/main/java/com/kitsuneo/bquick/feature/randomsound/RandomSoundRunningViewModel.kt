@@ -12,9 +12,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 data class RandomSoundRunningUiState(
+    val preparationSeconds: Int,
     val durationSeconds: Int,
     val minGapSeconds: Int,
     val maxGapSeconds: Int,
+    val remainingPreparationSeconds: Int = preparationSeconds,
     val remainingSessionSeconds: Int = durationSeconds,
     val nextCueInSeconds: Int,
     val cueCount: Int = 0,
@@ -23,19 +25,27 @@ data class RandomSoundRunningUiState(
     val isComplete: Boolean = false
 ) {
     val totalSessionSeconds: Int
-        get() = durationSeconds
+        get() = preparationSeconds + durationSeconds
+
+    val remainingTotalSeconds: Int
+        get() = remainingPreparationSeconds + remainingSessionSeconds
+
+    val isPreparing: Boolean
+        get() = remainingPreparationSeconds > 0 && !isComplete
 
     val progress: Float
-        get() = if (totalSessionSeconds == 0) 1f
-        else ((totalSessionSeconds - remainingSessionSeconds).toFloat() / totalSessionSeconds).coerceIn(0f, 1f)
+        get() = if (durationSeconds == 0) 1f
+        else ((durationSeconds - remainingSessionSeconds).toFloat() / durationSeconds).coerceIn(0f, 1f)
 }
 
 class RandomSoundRunningViewModel(
 ) : ViewModel() {
     private val initialState = RandomSoundRunningUiState(
+        preparationSeconds = 10,
         durationSeconds = 5 * 60,
         minGapSeconds = 15,
         maxGapSeconds = 45,
+        remainingPreparationSeconds = 10,
         remainingSessionSeconds = 5 * 60,
         nextCueInSeconds = 15,
         isRunning = false
@@ -67,9 +77,11 @@ class RandomSoundRunningViewModel(
 
     private fun ActiveTimerSession.Reaction.toUiState(): RandomSoundRunningUiState {
         return RandomSoundRunningUiState(
+            preparationSeconds = preparationSeconds,
             durationSeconds = durationSeconds,
             minGapSeconds = minGapSeconds,
             maxGapSeconds = maxGapSeconds,
+            remainingPreparationSeconds = remainingPreparationSeconds,
             remainingSessionSeconds = remainingSessionSeconds,
             nextCueInSeconds = nextCueInSeconds,
             cueCount = cueCount,

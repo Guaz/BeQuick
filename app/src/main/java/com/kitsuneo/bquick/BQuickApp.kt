@@ -23,13 +23,18 @@ import com.kitsuneo.bquick.feature.interval.IntervalSetupViewModel
 import com.kitsuneo.bquick.feature.randomsound.RandomSoundRunningViewModel
 import com.kitsuneo.bquick.feature.randomsound.RandomSoundSetupViewModel
 import com.kitsuneo.bquick.feature.splash.SplashViewModel
+import com.kitsuneo.bquick.feature.stopwatch.StopwatchRunningViewModel
+import com.kitsuneo.bquick.feature.timer.TimerRunningViewModel
+import com.kitsuneo.bquick.feature.timer.TimerSetupViewModel
 import com.kitsuneo.bquick.navigation.AppRoute
 import com.kitsuneo.bquick.notification.NotificationPermissionEffect
 import com.kitsuneo.bquick.settings.SoundLibraryRepository
 import com.kitsuneo.bquick.settings.SoundSelection
 import com.kitsuneo.bquick.settings.SoundSelectionCodec
 import com.kitsuneo.bquick.settings.SoundSettingsRepository
-import com.kitsuneo.bquick.settings.SoundTarget
+import com.kitsuneo.bquick.settings.TimerSignalPickerTarget
+import com.kitsuneo.bquick.settings.displayTitle
+import com.kitsuneo.bquick.settings.signalFor
 import com.kitsuneo.bquick.timer.TimerForegroundService
 import com.kitsuneo.bquick.ui.screen.AlarmsScreen
 import com.kitsuneo.bquick.ui.screen.AlarmCreateScreen
@@ -41,6 +46,10 @@ import com.kitsuneo.bquick.ui.screen.RandomSoundSetupScreen
 import com.kitsuneo.bquick.ui.screen.SettingsScreen
 import com.kitsuneo.bquick.ui.screen.SoundPickerScreen
 import com.kitsuneo.bquick.ui.screen.SplashScreen
+import com.kitsuneo.bquick.ui.screen.StopwatchRunningScreen
+import com.kitsuneo.bquick.ui.screen.TimerRunningScreen
+import com.kitsuneo.bquick.ui.screen.TimerSetupScreen
+import com.kitsuneo.bquick.ui.screen.TimerSignalPickerScreen
 
 private const val AlarmSoundSelectionResultKey = "alarm_sound_selection_result"
 private const val AlarmSoundSelectionCurrentKey = "alarm_sound_selection_current"
@@ -79,6 +88,8 @@ fun BQuickApp(modifier: Modifier = Modifier) {
 
             HomeScreen(
                 state = state,
+                onOpenTimer = { navController.navigate(AppRoute.TimerSetup.route) },
+                onOpenStopwatch = { navController.navigate(AppRoute.StopwatchRunning.route) },
                 onOpenInterval = { navController.navigate(AppRoute.IntervalSetup.route) },
                 onOpenRandomSound = { navController.navigate(AppRoute.RandomSoundSetup.route) },
                 onOpenAlarms = { navController.navigate(AppRoute.Alarms.route) },
@@ -238,9 +249,18 @@ fun BQuickApp(modifier: Modifier = Modifier) {
                 onAppLanguageChange = viewModel::updateAppLanguage,
                 onAlarmTimeFormatChange = viewModel::updateAlarmTimeFormat,
                 onHomeOrderChange = viewModel::updateHomeOrder,
-                onOpenSoundPicker = { target ->
-                    navController.navigate(AppRoute.SettingsSoundPicker.createRoute(target.name))
-                }
+                onOpenTimerSignalPicker = { target ->
+                    navController.navigate(AppRoute.SettingsSoundPicker.createRoute(target.routeArg))
+                },
+                onOpenTimerAlarmSoundPicker = {
+                    navController.navigate(AppRoute.SettingsTimerAlarmSoundPicker.route)
+                },
+                onOpenAlarmSoundPicker = {
+                    navController.navigate(AppRoute.SettingsAlarmSoundPicker.route)
+                },
+                onIntervalExtraCueEnabledChange = viewModel::updateIntervalExtraCueEnabled,
+                onIntervalExtraCueModeChange = viewModel::updateIntervalExtraCueMode,
+                onIntervalExtraCueSecondsChange = viewModel::updateIntervalExtraCueSeconds
             )
         }
 
@@ -252,34 +272,55 @@ fun BQuickApp(modifier: Modifier = Modifier) {
         ) { backStackEntry ->
             val targetArg = backStackEntry.arguments?.getString(AppRoute.SettingsSoundPicker.TargetArg)
                 ?: return@composable
-            val target = SoundTarget.valueOf(targetArg)
+            val target = TimerSignalPickerTarget.fromRouteArg(targetArg) ?: return@composable
+            val settings by SoundSettingsRepository.settings.collectAsState()
+            TimerSignalPickerScreen(
+                title = target.displayTitle(context),
+                currentSignal = settings.timerSignals.signalFor(target),
+                onBack = { navController.popBackStack() },
+                onSelectSignal = { signal ->
+                    SoundSettingsRepository.updateTimerSignal(target, signal)
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(AppRoute.SettingsAlarmSoundPicker.route) {
             val settings by SoundSettingsRepository.settings.collectAsState()
             val importedSounds by SoundLibraryRepository.customSounds.collectAsState()
-            val currentSelection = when (target) {
-                SoundTarget.ModeSwitch -> settings.modeSwitch
-                SoundTarget.Reaction -> settings.reaction
-            }
-            val titleRes = when (target) {
-                SoundTarget.ModeSwitch -> R.string.settings_mode_switch_sound_title
-                SoundTarget.Reaction -> R.string.settings_reaction_sound_title
-            }
 
             SoundPickerScreen(
-                title = context.getString(titleRes),
-                currentSelection = currentSelection,
+                title = context.getString(R.string.settings_default_alarm_sound_title),
+                currentSelection = settings.defaultAlarmSound,
                 importedSounds = importedSounds,
                 onBack = { navController.popBackStack() },
                 onSelectSound = { selection ->
-                    when (selection) {
-                        is SoundSelection.BuiltIn -> {
-                            SoundSettingsRepository.updateBuiltIn(target, selection.sound)
-                        }
-
-                        is SoundSelection.Custom -> {
-                            SoundLibraryRepository.addCustomSound(selection.uri, selection.label)
-                            SoundSettingsRepository.updateCustom(target, selection.uri, selection.label)
-                        }
+                    if (selection is SoundSelection.Custom) {
+                        SoundLibraryRepository.addCustomSound(selection.uri, selection.label)
                     }
+                    SoundSettingsRepository.updateDefaultAlarmSound(selection)
+                    navController.popBackStack()
+                },
+                onImportSound = { uri, label ->
+                    SoundLibraryRepository.addCustomSound(uri, label)
+                }
+            )
+        }
+
+        composable(AppRoute.SettingsTimerAlarmSoundPicker.route) {
+            val settings by SoundSettingsRepository.settings.collectAsState()
+            val importedSounds by SoundLibraryRepository.customSounds.collectAsState()
+
+            SoundPickerScreen(
+                title = context.getString(R.string.settings_timer_alarm_sound_title),
+                currentSelection = settings.timerAlarmSound,
+                importedSounds = importedSounds,
+                onBack = { navController.popBackStack() },
+                onSelectSound = { selection ->
+                    if (selection is SoundSelection.Custom) {
+                        SoundLibraryRepository.addCustomSound(selection.uri, selection.label)
+                    }
+                    SoundSettingsRepository.updateTimerAlarmSound(selection)
                     navController.popBackStack()
                 },
                 onImportSound = { uri, label ->
@@ -317,6 +358,48 @@ fun BQuickApp(modifier: Modifier = Modifier) {
             )
         }
 
+        composable(AppRoute.TimerSetup.route) {
+            val viewModel: TimerSetupViewModel = viewModel()
+            val state by viewModel.state.collectAsState()
+
+            TimerSetupScreen(
+                state = state,
+                onBack = { navController.popBackStack() },
+                onDurationSecondsChange = viewModel::updateDurationSeconds,
+                onStart = {
+                    TimerForegroundService.startCountdown(
+                        context = context,
+                        durationSeconds = state.durationSeconds
+                    )
+                    navController.navigate(AppRoute.TimerRunning.route)
+                }
+            )
+        }
+
+        composable(AppRoute.TimerRunning.route) {
+            val viewModel: TimerRunningViewModel = viewModel()
+            val state by viewModel.state.collectAsState()
+
+            TimerRunningScreen(
+                state = state,
+                onBack = { navController.popBackStack() },
+                onPrimaryAction = { viewModel.primaryAction(context) },
+                onReset = { viewModel.reset(context) }
+            )
+        }
+
+        composable(AppRoute.StopwatchRunning.route) {
+            val viewModel: StopwatchRunningViewModel = viewModel()
+            val state by viewModel.state.collectAsState()
+
+            StopwatchRunningScreen(
+                state = state,
+                onBack = { navController.popBackStack() },
+                onPrimaryAction = { viewModel.primaryAction(context) },
+                onReset = { viewModel.reset(context) }
+            )
+        }
+
         composable(AppRoute.IntervalSetup.route) {
             val viewModel: IntervalSetupViewModel = viewModel()
             val state by viewModel.state.collectAsState()
@@ -324,12 +407,14 @@ fun BQuickApp(modifier: Modifier = Modifier) {
             IntervalSetupScreen(
                 state = state,
                 onBack = { navController.popBackStack() },
+                onPreparationSecondsChange = viewModel::updatePreparationSeconds,
                 onWorkSecondsChange = viewModel::updateWorkSeconds,
                 onRestSecondsChange = viewModel::updateRestSeconds,
                 onRoundsChange = viewModel::updateRounds,
                 onStart = {
                     TimerForegroundService.startInterval(
                         context = context,
+                        preparationSeconds = state.preparationSeconds,
                         workSeconds = state.workSeconds,
                         restSeconds = state.restSeconds,
                         rounds = state.rounds
@@ -358,12 +443,14 @@ fun BQuickApp(modifier: Modifier = Modifier) {
             RandomSoundSetupScreen(
                 state = state,
                 onBack = { navController.popBackStack() },
+                onPreparationSecondsChange = viewModel::updatePreparationSeconds,
                 onDurationSecondsChange = viewModel::updateDurationSeconds,
                 onMinGapSecondsChange = viewModel::updateMinGapSeconds,
                 onMaxGapSecondsChange = viewModel::updateMaxGapSeconds,
                 onStart = {
                     TimerForegroundService.startReaction(
                         context = context,
+                        preparationSeconds = state.preparationSeconds,
                         durationSeconds = state.durationSeconds,
                         minGapSeconds = state.minGapSeconds,
                         maxGapSeconds = state.maxGapSeconds

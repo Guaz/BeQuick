@@ -14,13 +14,11 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.kitsuneo.bquick.R
-import com.kitsuneo.bquick.feature.interval.IntervalRunningUiState
-import com.kitsuneo.bquick.timer.IntervalPhase
+import com.kitsuneo.bquick.feature.timer.TimerRunningUiState
 import com.kitsuneo.bquick.ui.component.AnimatedSessionBackground
 import com.kitsuneo.bquick.ui.component.BQuickCard
 import com.kitsuneo.bquick.ui.component.BQuickButton
@@ -34,10 +32,10 @@ import com.kitsuneo.bquick.ui.theme.BQuickTheme
 import com.kitsuneo.bquick.ui.util.asClock
 
 @Composable
-fun IntervalRunningScreen(
-    state: IntervalRunningUiState,
+fun TimerRunningScreen(
+    state: TimerRunningUiState,
     onBack: () -> Unit,
-    onPauseResume: () -> Unit,
+    onPrimaryAction: () -> Unit,
     onReset: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -46,22 +44,15 @@ fun IntervalRunningScreen(
     val resetLabel = stringResource(R.string.reset)
     var holdOverlayLabel by remember { mutableStateOf<String?>(null) }
     var holdOverlayProgress by remember { mutableFloatStateOf(0f) }
-    val phaseLabel = when (state.currentPhase) {
-        IntervalPhase.Preparation -> stringResource(R.string.phase_preparation)
-        IntervalPhase.Work -> stringResource(R.string.phase_work)
-        IntervalPhase.Rest -> stringResource(R.string.phase_rest)
-        IntervalPhase.Complete -> stringResource(R.string.phase_complete)
-    }
-    val backgroundStyle = when (state.currentPhase) {
-        IntervalPhase.Preparation -> SessionBackgroundStyle.Preparation
-        IntervalPhase.Work -> SessionBackgroundStyle.Fire
-        IntervalPhase.Rest -> SessionBackgroundStyle.Wave
-        IntervalPhase.Complete -> SessionBackgroundStyle.Neutral
+    val backgroundStyle = when {
+        state.isComplete -> SessionBackgroundStyle.Neutral
+        state.isRunning -> SessionBackgroundStyle.Wave
+        else -> SessionBackgroundStyle.Preparation
     }
 
     ScreenFrame(
-        title = stringResource(R.string.interval_running_title),
-        subtitle = stringResource(R.string.interval_running_subtitle, state.currentRound, state.totalRounds),
+        title = stringResource(R.string.timer_running_title),
+        subtitle = stringResource(R.string.timer_running_subtitle),
         modifier = modifier,
         navigationContent = {
             if (state.isRunning) {
@@ -97,18 +88,25 @@ fun IntervalRunningScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
-            MetricPill(label = stringResource(R.string.interval_phase), value = phaseLabel, modifier = Modifier.weight(1f))
-            MetricPill(label = stringResource(R.string.remaining), value = state.remainingProgramSeconds.asClock(), modifier = Modifier.weight(1f))
+            MetricPill(
+                label = stringResource(R.string.remaining),
+                value = state.remainingSeconds.asClock(),
+                modifier = Modifier.weight(1f)
+            )
+            MetricPill(
+                label = stringResource(R.string.elapsed),
+                value = state.elapsedSeconds.asClock(),
+                modifier = Modifier.weight(1f)
+            )
         }
 
         StatusCard(
-            label = phaseLabel,
-            value = state.remainingPhaseSeconds.asClock(),
-            supportingText = when (state.currentPhase) {
-                IntervalPhase.Preparation -> stringResource(R.string.interval_preparation_support)
-                IntervalPhase.Work -> stringResource(R.string.interval_work_support)
-                IntervalPhase.Rest -> stringResource(R.string.interval_rest_support)
-                IntervalPhase.Complete -> stringResource(R.string.interval_complete_support)
+            label = stringResource(R.string.home_timer_title),
+            value = if (state.isComplete) stringResource(R.string.done) else state.remainingSeconds.asClock(),
+            supportingText = when {
+                state.isComplete -> stringResource(R.string.timer_complete_support)
+                state.isRunning -> stringResource(R.string.timer_running_support)
+                else -> stringResource(R.string.timer_paused_support)
             }
         )
 
@@ -116,30 +114,14 @@ fun IntervalRunningScreen(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
             verticalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(R.string.phase_progress),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                LinearProgressIndicator(
-                    progress = { state.phaseProgress },
-                    drawStopIndicator = {},
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.session_progress),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
                 LinearProgressIndicator(
-                    progress = { state.sessionProgress },
+                    progress = { state.progress },
                     drawStopIndicator = {},
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -151,8 +133,14 @@ fun IntervalRunningScreen(
             horizontalArrangement = Arrangement.spacedBy(dimensions.space1)
         ) {
             BQuickButton(
-                text = stringResource(if (state.isRunning) R.string.pause else R.string.resume),
-                onClick = onPauseResume,
+                text = stringResource(
+                    when {
+                        !state.hasActiveSession -> R.string.start
+                        state.isRunning -> R.string.pause
+                        else -> R.string.resume
+                    }
+                ),
+                onClick = onPrimaryAction,
                 modifier = Modifier.weight(1f),
                 isDisabled = state.isComplete
             )
@@ -160,6 +148,7 @@ fun IntervalRunningScreen(
                 text = resetLabel,
                 onConfirmed = onReset,
                 modifier = Modifier.weight(1f),
+                enabled = state.hasActiveSession,
                 onHoldStateChange = { isHolding ->
                     holdOverlayLabel = if (isHolding) resetLabel else null
                 },
@@ -172,7 +161,7 @@ fun IntervalRunningScreen(
 
         if (state.isComplete) {
             Text(
-                text = stringResource(R.string.interval_complete_message),
+                text = stringResource(R.string.timer_complete_message),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium

@@ -180,6 +180,7 @@ class AlarmAlertService : Service() {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setContentIntent(alertPendingIntent)
+            .setFullScreenIntent(alertPendingIntent, true)
             .addAction(
                 android.R.drawable.ic_media_pause,
                 getString(R.string.dismiss),

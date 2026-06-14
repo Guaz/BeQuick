@@ -7,6 +7,15 @@ fun Int.asClock(): String {
     return "%02d:%02d".format(minutes, seconds)
 }
 
+fun Long.asStopwatch(): String {
+    val totalMillis = coerceAtLeast(0L)
+    val totalSeconds = totalMillis / 1_000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    val millis = totalMillis % 1_000
+    return "%02d:%02d.%03d".format(minutes, seconds, millis)
+}
+
 fun String.toClockSecondsOrNull(): Int? {
     val digits = filter(Char::isDigit).takeLast(4)
     if (digits.isEmpty()) return 0

@@ -17,6 +17,11 @@ sealed class AppRoute(val route: String) {
 
         fun createRoute(target: String): String = "settings/sound/$target"
     }
+    data object SettingsTimerAlarmSoundPicker : AppRoute("settings/timer-alarm-sound")
+    data object SettingsAlarmSoundPicker : AppRoute("settings/alarm-sound")
+    data object TimerSetup : AppRoute("timer/setup")
+    data object TimerRunning : AppRoute("timer/running")
+    data object StopwatchRunning : AppRoute("stopwatch/running")
     data object IntervalSetup : AppRoute("interval/setup")
     data object IntervalRunning : AppRoute("interval/running")
 

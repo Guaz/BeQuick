@@ -8,12 +8,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -29,6 +26,8 @@ import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.audio.AppSoundPlayer
 import com.kitsuneo.bquick.settings.BuiltInSound
 import com.kitsuneo.bquick.settings.SoundSelection
+import com.kitsuneo.bquick.ui.component.BQuickCard
+import com.kitsuneo.bquick.ui.component.BQuickButton
 import com.kitsuneo.bquick.ui.component.ScreenFrame
 import com.kitsuneo.bquick.ui.theme.BQuickTheme
 
@@ -90,9 +89,10 @@ fun SoundPickerScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(onClick = { pickerLauncher.launch(arrayOf("audio/*")) }) {
-                Text(text = stringResource(R.string.sound_picker_load_from_phone))
-            }
+            BQuickButton(
+                text = stringResource(R.string.sound_picker_load_from_phone),
+                onClick = { pickerLauncher.launch(arrayOf("audio/*")) }
+            )
         }
 
         SoundSectionCard(
@@ -138,23 +138,16 @@ private fun SoundSectionCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-        shape = MaterialTheme.shapes.extraLarge
+        verticalArrangement = Arrangement.spacedBy(dimensions.space1 + dimensions.space05)
     ) {
-        Column(
-            modifier = Modifier.padding(dimensions.space2),
-            verticalArrangement = Arrangement.spacedBy(dimensions.space1 + dimensions.space05),
-            content = {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                content()
-            }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
         )
+        content()
     }
 }
 
@@ -166,23 +159,22 @@ private fun SoundOptionRow(
     onSelect: () -> Unit
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onSelect),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)),
-        shape = MaterialTheme.shapes.large
+        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(dimensions.space2),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(dimensions.space1 + dimensions.space05),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(onClick = onPlay) {
-                Text(text = stringResource(R.string.play))
-            }
+            BQuickButton(
+                text = stringResource(R.string.play),
+                onClick = onPlay
+            )
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,

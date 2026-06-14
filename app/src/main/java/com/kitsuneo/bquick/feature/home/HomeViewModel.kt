@@ -5,9 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.kitsuneo.bquick.alarm.AlarmRepository
 import com.kitsuneo.bquick.settings.AlarmTimeFormat
 import com.kitsuneo.bquick.settings.AppLanguage
-import com.kitsuneo.bquick.settings.BuiltInSound
+import com.kitsuneo.bquick.settings.IntervalCueMode
 import com.kitsuneo.bquick.settings.SoundSelection
 import com.kitsuneo.bquick.settings.SoundSettingsRepository
+import com.kitsuneo.bquick.settings.TimerSignalSettings
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,12 +18,15 @@ import kotlinx.coroutines.launch
 enum class HomeDestination {
     Interval,
     RandomSound,
+    Timer,
+    Stopwatch,
     Alarms
 }
 
 data class HomeUiState(
-    val modeSwitchSound: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.SmoothMorning),
-    val reactionSound: SoundSelection = SoundSelection.BuiltIn(BuiltInSound.TimeToShine),
+    val timerSignals: TimerSignalSettings = TimerSignalSettings(),
+    val timerAlarmSound: SoundSelection = SoundSelection.BuiltIn(com.kitsuneo.bquick.settings.BuiltInSound.WakeUpAnthem),
+    val defaultAlarmSound: SoundSelection = SoundSelection.BuiltIn(com.kitsuneo.bquick.settings.BuiltInSound.WakeUpAnthem),
     val homeOrder: List<HomeDestination> = HomeDestination.entries,
     val alarmTimeFormat: AlarmTimeFormat = AlarmTimeFormat.Hours24,
     val appLanguage: AppLanguage = AppLanguage.English,
@@ -41,8 +45,9 @@ class HomeViewModel : ViewModel() {
                 AlarmRepository.alarms
             ) { settings, alarms ->
                 HomeUiState(
-                    modeSwitchSound = settings.modeSwitch,
-                    reactionSound = settings.reaction,
+                    timerSignals = settings.timerSignals,
+                    timerAlarmSound = settings.timerAlarmSound,
+                    defaultAlarmSound = settings.defaultAlarmSound,
                     homeOrder = settings.homeOrder,
                     alarmTimeFormat = settings.alarmTimeFormat,
                     appLanguage = settings.appLanguage,
@@ -65,5 +70,17 @@ class HomeViewModel : ViewModel() {
 
     fun updateAppLanguage(language: AppLanguage) {
         SoundSettingsRepository.updateAppLanguage(language)
+    }
+
+    fun updateIntervalExtraCueEnabled(index: Int, enabled: Boolean) {
+        SoundSettingsRepository.updateIntervalExtraCueEnabled(index, enabled)
+    }
+
+    fun updateIntervalExtraCueMode(index: Int, mode: IntervalCueMode) {
+        SoundSettingsRepository.updateIntervalExtraCueMode(index, mode)
+    }
+
+    fun updateIntervalExtraCueSeconds(index: Int, secondsBeforeEnd: Int) {
+        SoundSettingsRepository.updateIntervalExtraCueSeconds(index, secondsBeforeEnd)
     }
 }

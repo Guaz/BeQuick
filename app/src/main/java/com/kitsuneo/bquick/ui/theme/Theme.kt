@@ -1,12 +1,15 @@
 package com.kitsuneo.bquick.ui.theme
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -54,8 +57,13 @@ data class BQuickDimensions(
 )
 
 private val DefaultDimensions = BQuickDimensions()
+data class BQuickShapes(
+    val card: CornerBasedShape = RoundedCornerShape(24.dp)
+)
 
+private val DefaultShapes = BQuickShapes()
 private val LocalBQuickDimensions = staticCompositionLocalOf { DefaultDimensions }
+private val LocalBQuickShapes = staticCompositionLocalOf { DefaultShapes }
 
 object BQuickTheme {
     val dimensions: BQuickDimensions
@@ -63,16 +71,27 @@ object BQuickTheme {
         @ReadOnlyComposable
         get() = LocalBQuickDimensions.current
 
+    val shapes: BQuickShapes
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalBQuickShapes.current
+
     @Composable
     operator fun invoke(
         darkTheme: Boolean = true,
         content: @Composable () -> Unit
     ) {
+        val shapes = DefaultShapes
         CompositionLocalProvider(
-            LocalBQuickDimensions provides DefaultDimensions
+            LocalBQuickDimensions provides DefaultDimensions,
+            LocalBQuickShapes provides shapes
         ) {
             MaterialTheme(
                 colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+                shapes = Shapes(
+                    large = shapes.card,
+                    extraLarge = shapes.card
+                ),
                 typography = Typography,
                 content = content
             )

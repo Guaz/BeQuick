@@ -7,17 +7,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 data class RandomSoundSetupUiState(
+    val preparationSeconds: Int = 10,
     val durationSeconds: Int = 5 * 60,
     val minGapSeconds: Int = 15,
     val maxGapSeconds: Int = 45
 ) {
     val totalSessionSeconds: Int
-        get() = durationSeconds
+        get() = preparationSeconds + durationSeconds
 }
 
 class RandomSoundSetupViewModel : ViewModel() {
     private val _state = MutableStateFlow(RandomSoundSetupUiState())
     val state: StateFlow<RandomSoundSetupUiState> = _state.asStateFlow()
+
+    fun updatePreparationSeconds(value: Int) {
+        _state.update { it.copy(preparationSeconds = value.coerceIn(0, 120)) }
+    }
 
     fun updateDurationSeconds(value: Int) {
         _state.update { it.copy(durationSeconds = value.coerceIn(10, 59 * 60 + 59)) }

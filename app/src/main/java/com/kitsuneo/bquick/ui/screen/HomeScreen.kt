@@ -1,38 +1,34 @@
 package com.kitsuneo.bquick.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.home.HomeDestination
 import com.kitsuneo.bquick.feature.home.HomeUiState
-import com.kitsuneo.bquick.settings.displayLabel
+import com.kitsuneo.bquick.ui.component.BQuickCard
+import com.kitsuneo.bquick.ui.component.BQuickButton
 import com.kitsuneo.bquick.ui.component.ScreenFrame
 import com.kitsuneo.bquick.ui.theme.BQuickTheme
 
 @Composable
 fun HomeScreen(
     state: HomeUiState,
+    onOpenTimer: () -> Unit,
+    onOpenStopwatch: () -> Unit,
     onOpenInterval: () -> Unit,
     onOpenRandomSound: () -> Unit,
     onOpenAlarms: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     ScreenFrame(
         showHeader = false,
         modifier = modifier
@@ -59,6 +55,26 @@ fun HomeScreen(
                     )
                 }
 
+                HomeDestination.Timer -> {
+                    HomeFeatureCard(
+                        eyebrow = stringResource(R.string.home_timer_eyebrow),
+                        title = stringResource(R.string.home_timer_title),
+                        description = stringResource(R.string.home_timer_description),
+                        actionLabel = stringResource(R.string.home_timer_action),
+                        onClick = onOpenTimer
+                    )
+                }
+
+                HomeDestination.Stopwatch -> {
+                    HomeFeatureCard(
+                        eyebrow = stringResource(R.string.home_stopwatch_eyebrow),
+                        title = stringResource(R.string.home_stopwatch_title),
+                        description = stringResource(R.string.home_stopwatch_description),
+                        actionLabel = stringResource(R.string.home_stopwatch_action),
+                        onClick = onOpenStopwatch
+                    )
+                }
+
                 HomeDestination.Alarms -> {
                     HomeFeatureCard(
                         eyebrow = stringResource(R.string.home_alarms_eyebrow),
@@ -79,13 +95,12 @@ fun HomeScreen(
                 }
             }
         }
-
-        SettingsEntryCard(
-            modeSwitchSoundLabel = state.modeSwitchSound.displayLabel(context),
-            reactionSoundLabel = state.reactionSound.displayLabel(context),
-            alarmTimeFormatLabel = stringResource(state.alarmTimeFormat.labelRes),
-            languageLabel = stringResource(state.appLanguage.labelRes),
-            onOpenSettings = onOpenSettings
+        HomeFeatureCard(
+            eyebrow = stringResource(R.string.home_settings_eyebrow),
+            title = stringResource(R.string.settings_title),
+            description = stringResource(R.string.home_settings_description),
+            actionLabel = stringResource(R.string.home_settings_action),
+            onClick = onOpenSettings
         )
     }
 }
@@ -100,102 +115,41 @@ private fun HomeFeatureCard(
     supportingValue: String? = null
 ) {
     val dimensions = BQuickTheme.dimensions
-    Card(
+    BQuickCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-        shape = MaterialTheme.shapes.extraLarge
+        verticalArrangement = Arrangement.spacedBy(dimensions.space2)
     ) {
-        Column(
-            modifier = Modifier.padding(dimensions.space2),
-            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
-        ) {
+        Text(
+            text = eyebrow.uppercase(),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        supportingValue?.let { value ->
             Text(
-                text = eyebrow.uppercase(),
+                text = value,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            supportingValue?.let { value ->
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Button(onClick = onClick) {
-                    Text(text = actionLabel)
-                }
-            }
         }
-    }
-}
-
-@Composable
-private fun SettingsEntryCard(
-    modeSwitchSoundLabel: String,
-    reactionSoundLabel: String,
-    alarmTimeFormatLabel: String,
-    languageLabel: String,
-    onOpenSettings: () -> Unit
-) {
-    val dimensions = BQuickTheme.dimensions
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
-        shape = MaterialTheme.shapes.extraLarge
-    ) {
-        Column(
-            modifier = Modifier.padding(dimensions.space2),
-            verticalArrangement = Arrangement.spacedBy(dimensions.space2)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
         ) {
-            Text(
-                text = stringResource(R.string.settings_card_title),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
+            BQuickButton(
+                text = actionLabel,
+                onClick = onClick
             )
-            Text(
-                text = stringResource(R.string.settings_mode_switch_sound, modeSwitchSoundLabel),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = stringResource(R.string.settings_reaction_sound, reactionSoundLabel),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = stringResource(R.string.settings_alarm_time_format, alarmTimeFormatLabel),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = stringResource(R.string.settings_language, languageLabel),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Button(onClick = onOpenSettings) {
-                    Text(text = stringResource(R.string.settings_open))
-                }
-            }
         }
     }
 }

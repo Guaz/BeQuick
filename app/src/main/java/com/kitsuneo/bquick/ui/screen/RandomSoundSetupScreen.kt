@@ -3,17 +3,14 @@ package com.kitsuneo.bquick.ui.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import com.kitsuneo.bquick.R
 import com.kitsuneo.bquick.feature.randomsound.RandomSoundSetupUiState
+import com.kitsuneo.bquick.ui.component.BQuickCard
+import com.kitsuneo.bquick.ui.component.BQuickButton
 import com.kitsuneo.bquick.ui.component.MetricPill
 import com.kitsuneo.bquick.ui.component.ScreenFrame
 import com.kitsuneo.bquick.ui.component.TimeAdjusterCard
@@ -24,6 +21,7 @@ import com.kitsuneo.bquick.ui.util.asClock
 fun RandomSoundSetupScreen(
     state: RandomSoundSetupUiState,
     onBack: () -> Unit,
+    onPreparationSecondsChange: (Int) -> Unit,
     onDurationSecondsChange: (Int) -> Unit,
     onMinGapSecondsChange: (Int) -> Unit,
     onMaxGapSecondsChange: (Int) -> Unit,
@@ -48,6 +46,15 @@ fun RandomSoundSetupScreen(
                 modifier = Modifier.weight(1f)
             )
         }
+
+        TimeAdjusterCard(
+            label = stringResource(R.string.random_preparation_time),
+            seconds = state.preparationSeconds,
+            helper = stringResource(R.string.random_preparation_helper),
+            onSecondsChange = onPreparationSecondsChange,
+            minSeconds = 0,
+            maxSeconds = 120
+        )
 
         TimeAdjusterCard(
             label = stringResource(R.string.random_duration),
@@ -76,20 +83,17 @@ fun RandomSoundSetupScreen(
             maxSeconds = 59 * 60 + 59
         )
 
-        Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.82f)),
-            shape = MaterialTheme.shapes.extraLarge
+        BQuickCard(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.82f)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Button(onClick = onStart) {
-                    Text(
-                        text = stringResource(R.string.random_start),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                BQuickButton(
+                    text = stringResource(R.string.random_start),
+                    onClick = onStart
+                )
             }
         }
     }

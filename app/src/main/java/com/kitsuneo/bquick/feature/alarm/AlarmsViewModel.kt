@@ -67,11 +67,13 @@ class AlarmsViewModel : ViewModel() {
                 AlarmRepository.alarms,
                 SoundSettingsRepository.settings
             ) { alarms, settings ->
-                alarms to settings.alarmTimeFormat
-            }.collectLatest { (alarms, alarmTimeFormat) ->
+                Triple(alarms, settings.alarmTimeFormat, settings.defaultAlarmSound)
+            }.collectLatest { (alarms, alarmTimeFormat, defaultAlarmSound) ->
                 _state.value = _state.value.copy(
                     alarms = alarms,
-                    alarmTimeFormat = alarmTimeFormat
+                    alarmTimeFormat = alarmTimeFormat,
+                    draft = _state.value.draft.takeIf { it.editingAlarmId != null }
+                        ?: _state.value.draft.copy(soundSelection = defaultAlarmSound)
                 )
             }
         }
@@ -200,6 +202,7 @@ class AlarmsViewModel : ViewModel() {
                 hour = draft.hour,
                 minute = draft.minute,
                 repeatDays = draft.repeatDays,
+                enabled = true,
                 soundSelection = draft.soundSelection,
                 volumePercent = draft.volumePercent,
                 fadeUpEnabled = draft.fadeUpEnabled,
@@ -226,12 +229,20 @@ class AlarmsViewModel : ViewModel() {
     }
 
     private fun resetDraft() {
-        _state.value = _state.value.copy(draft = newAlarmDraftUiState())
+        _state.value = _state.value.copy(
+            draft = newAlarmDraftUiState(
+                defaultSoundSelection = SoundSettingsRepository.settings.value.defaultAlarmSound
+            )
+        )
     }
 }
 
-private fun newAlarmDraftUiState(now: Calendar = Calendar.getInstance()): AlarmDraftUiState {
+private fun newAlarmDraftUiState(
+    defaultSoundSelection: SoundSelection = SoundSettingsRepository.settings.value.defaultAlarmSound,
+    now: Calendar = Calendar.getInstance()
+): AlarmDraftUiState {
     return AlarmDraftUiState(
+        soundSelection = defaultSoundSelection,
         hour = now.get(Calendar.HOUR_OF_DAY),
         minute = now.get(Calendar.MINUTE)
     )

@@ -13,18 +13,19 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 data class IntervalRunningUiState(
+    val preparationSeconds: Int,
     val workSeconds: Int,
     val restSeconds: Int,
     val totalRounds: Int,
     val currentRound: Int = 1,
-    val currentPhase: IntervalPhase = IntervalPhase.Work,
-    val phaseDurationSeconds: Int = workSeconds,
-    val remainingPhaseSeconds: Int = workSeconds,
+    val currentPhase: IntervalPhase = if (preparationSeconds > 0) IntervalPhase.Preparation else IntervalPhase.Work,
+    val phaseDurationSeconds: Int = if (preparationSeconds > 0) preparationSeconds else workSeconds,
+    val remainingPhaseSeconds: Int = phaseDurationSeconds,
     val isRunning: Boolean = true,
     val isComplete: Boolean = false
 ) {
     val totalDurationSeconds: Int
-        get() = (workSeconds * totalRounds) + (restSeconds * (totalRounds - 1))
+        get() = preparationSeconds + (workSeconds * totalRounds) + (restSeconds * (totalRounds - 1))
 
     val elapsedSeconds: Int
         get() = totalDurationSeconds - remainingProgramSeconds
@@ -33,20 +34,26 @@ data class IntervalRunningUiState(
         get() {
             if (isComplete) return 0
 
-            val completedWorkRounds = when (currentPhase) {
-                IntervalPhase.Work -> currentRound - 1
-                IntervalPhase.Rest -> currentRound
-                IntervalPhase.Complete -> totalRounds
+            val completedSecondsBeforePhase = when (currentPhase) {
+                IntervalPhase.Preparation -> 0
+                IntervalPhase.Work -> {
+                    preparationSeconds +
+                        ((currentRound - 1) * workSeconds) +
+                        ((currentRound - 1).coerceAtLeast(0) * restSeconds)
+                }
+                IntervalPhase.Rest -> {
+                    preparationSeconds +
+                        (currentRound * workSeconds) +
+                        ((currentRound - 1).coerceAtLeast(0) * restSeconds)
+                }
+                IntervalPhase.Complete -> totalDurationSeconds
             }
-            val completedRestRounds = when (currentPhase) {
-                IntervalPhase.Work -> (currentRound - 1).coerceAtLeast(0)
-                IntervalPhase.Rest -> currentRound - 1
-                IntervalPhase.Complete -> (totalRounds - 1).coerceAtLeast(0)
+            val progressedInCurrentPhase = if (currentPhase == IntervalPhase.Complete) {
+                0
+            } else {
+                phaseDurationSeconds - remainingPhaseSeconds
             }
-            val completedSeconds =
-                (completedWorkRounds * workSeconds) + (completedRestRounds * restSeconds)
-            val remainingSegment = if (currentPhase == IntervalPhase.Complete) 0 else remainingPhaseSeconds
-            return (totalDurationSeconds - completedSeconds - (phaseDurationSeconds - remainingSegment))
+            return (totalDurationSeconds - completedSecondsBeforePhase - progressedInCurrentPhase)
                 .coerceAtLeast(0)
         }
 
@@ -62,6 +69,7 @@ data class IntervalRunningUiState(
 class IntervalRunningViewModel(
 ) : ViewModel() {
     private val initialState = IntervalRunningUiState(
+        preparationSeconds = 10,
         workSeconds = 40,
         restSeconds = 20,
         totalRounds = 8,
@@ -94,6 +102,7 @@ class IntervalRunningViewModel(
 
     private fun ActiveTimerSession.Interval.toUiState(): IntervalRunningUiState {
         return IntervalRunningUiState(
+            preparationSeconds = preparationSeconds,
             workSeconds = workSeconds,
             restSeconds = restSeconds,
             totalRounds = totalRounds,
